@@ -3,15 +3,17 @@
 # dog - concatenate files and print on the standard output
 
 import sys
+import os
 
 args = sys.argv[1:]
+file = sys.argv[0]
 options = ["A", "b", "n", "E", "T", "u"]
 arg_list = []
 new_args = []
 line_end = None
 line_count = ""
 
-help_message = """Usage: dog [OPTION]... [FILE]...
+help_message = f"""Usage: {file} [OPTION]... [FILE]...
 Concatenate FILE(s) to standard output.
 
 With no FILE, or when FILE is -, read standard input.
@@ -26,10 +28,10 @@ With no FILE, or when FILE is -, read standard input.
       --version     output version information and exit
 
 Examples:
-  dog f - g  Output f's contents, then standard input, then g's contents.
-  dog        Copy standard input to standard output.
+  {file} f - g  Output f's contents, then standard input, then g's contents.
+  {file}        Copy standard input to standard output.
 """
-version_message = """dog (pyutils) 2022.07.29
+version_message = f"""{file} (pyutils) 2022.07.29
 Written by John Crawford"""
 
 
@@ -92,9 +94,7 @@ for x in args:
         elif x == "--number":
             art_list.append("n")
         else:
-            arg_list += x.replace("-", "")
-        
-        
+            arg_list += x.replace("-", "")       
     else:
         new_args += [x]
 
@@ -102,7 +102,7 @@ for x in args:
 #exit with invalid options
 for x in arg_list:
     if x not in options:
-        print("dog: invalid option -- '{0}'\nTry 'dog --help' for more information.".format(x.replace("-", "")))
+        print("{0}: invalid option -- '{1}'\nTry '{2} --help' for more information.".format(file, x.replace("-", ""), file))
         exit(1)
 
 
