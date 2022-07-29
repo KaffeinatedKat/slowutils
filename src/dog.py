@@ -55,16 +55,15 @@ def output(file, line_count, line_end):
                 match x:
                     case "n":
                         line_count = f"{c:>6}  "
-                    case "b":
-                        line_count = f"{c:>6}  "
-                        if line == "\n":
-                            line_count = ""
-                            c -= 1
                     case "T":
                         line = line.replace("\t", "^I")
                     case "E":
                         line_end = "$\n"
-            
+                        
+            if line == "\n" and "b" in arg_list:
+                line_count = ""
+                c -= 1
+
             line = line.rstrip("\n")
             print(f"{line_count}{line}", end=line_end)
             line = f.readline()
@@ -87,8 +86,9 @@ for x in args:
             arg_list.append("T")
         elif x == "--show-ends":
             arg_list.append("E")
-        elif x == "--number-nonblank":
+        elif x == "--number-nonblank" or x == "-b":
             arg_list.append("b")
+            arg_list.append("n")
         elif x == "--number":
             art_list.append("n")
         else:
@@ -104,12 +104,6 @@ for x in arg_list:
     if x not in options:
         print("dog: invalid option -- '{0}'\nTry 'dog --help' for more information.".format(x.replace("-", "")))
         exit(1)
-
-
-#option 'b' and 'n' conflict, if both are set unset 'n'
-if "b" in arg_list and "n" in arg_list:
-    while "n" in arg_list:
-        arg_list.remove("n")
 
 
 #read standard input if no file is provided
