@@ -4,14 +4,16 @@
 
 import sys
 
-help_message = """Usage: yes [STRING]...
-  or:  yes OPTION
-Repeatedly output a line with all specified STRING(s), or 'y'.
+file = sys.argv[0]
+
+help_message = f"""Usage: {file} [STRING]...
+  or:  {file} OPTION
+Repeatedly output a line with all specified STRING(s), or 'n'.
 
       --help        display this help and exit
       --version     output version information and exit
 """
-version_message = """no (pythonutils) 2022.07.23
+version_message = f"""{file} (pythonutils) 2022.07.23
 Written by John Crawford"""
 args = " ".join(sys.argv[1:])
 
