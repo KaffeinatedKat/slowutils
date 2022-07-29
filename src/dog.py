@@ -74,14 +74,26 @@ def output(file, line_count, line_end):
 #parse command line arguments
 for x in args:
     if x.startswith("-") == True and x.endswith("-") == False:
-        arg_list += args[args.index(x)].replace("-", "")
-
         if x == "--help":
             print(help_message)
             exit(0)
         elif x == "--version":
             print(version_message)
             exit(0)
+        elif x == "--show-all" or x == "-A":
+            arg_list.append("E")
+            arg_list.append("T")
+        elif x == "--show-tabs":
+            arg_list.append("T")
+        elif x == "--show-ends":
+            arg_list.append("E")
+        elif x == "--number-nonblank":
+            arg_list.append("b")
+        elif x == "--number":
+            art_list.append("n")
+        else:
+            arg_list += x.replace("-", "")
+        
         
     else:
         new_args += [x]
