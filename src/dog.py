@@ -29,7 +29,7 @@ Examples:
   dog f - g  Output f's contents, then standard input, then g's contents.
   dog        Copy standard input to standard output.
 """
-version_message = """dog (pyutils) 2022.07.25
+version_message = """dog (pyutils) 2022.07.29
 Written by John Crawford"""
 
 
