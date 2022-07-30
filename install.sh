@@ -9,4 +9,4 @@ fi
 
 cp src/kitty.py "$path"kitty
 cp src/yeah.py "$path"yeah
-cp src/isthatme "$path"isthatme
+cp src/isthatme.py "$path"isthatme
