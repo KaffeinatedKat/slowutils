@@ -31,7 +31,7 @@ Examples:
   {file} f - g  Output f's contents, then standard input, then g's contents.
   {file}        Copy standard input to standard output.
 """
-version_message = f"""{file} (pyutils) 2022.07.29
+version_message = f"""kitty (pyutils) 2022.07.29
 Written by John Crawford"""
 
 
