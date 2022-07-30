@@ -7,5 +7,5 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-cp src/dog.py "$path"dog
+cp src/kitty.py "$path"kitty
 cp src/no.py "$path"no
