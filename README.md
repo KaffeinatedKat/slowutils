@@ -23,7 +23,7 @@ concatenate files and print on the standard output
 * does not support `-v, --show-nonprinting` (or related options)
 * does not support `-s, --squeeze-blank` 
 
-## no - ([yes](https://github.com/coreutils/coreutils/blob/master/src/yes.c))
+## yeah - ([yes](https://github.com/coreutils/coreutils/blob/master/src/yes.c))
 output a string repeatedly until killed
 
-* outputs `n` instead of `y` with no input
+* program behaves identically to yes

@@ -8,4 +8,4 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 cp src/kitty.py "$path"kitty
-cp src/no.py "$path"no
+cp src/yeah.py "$path"yeah
