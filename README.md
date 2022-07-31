@@ -3,8 +3,6 @@ A few of the coreutils written in python becuase why not
 
 Below is the list of programs I have rewritten thus far, and how they differ from the original
 
-The names are synonyms of the orignial program name
-
 ## Install
 
 ```
@@ -17,7 +15,7 @@ sudo ./install.sh
 
 # Programs
 
-## kitty - ([cat](https://github.com/coreutils/coreutils/blob/master/src/cat.c))
+## dog - ([cat](https://github.com/coreutils/coreutils/blob/master/src/cat.c))
 concatenate files and print on the standard output
 
 * does not support `-v, --show-nonprinting` (or related options)
