@@ -1,7 +1,11 @@
-# Pyutils
+# pyutils
 A few of the coreutils written in python becuase why not
 
 Below is the list of programs I have rewritten thus far, and how they differ from the original
+
+## Requirements
+
+* python 3+
 
 ## Install
 
