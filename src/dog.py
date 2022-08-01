@@ -75,10 +75,10 @@ def output(file, line_count, line_end):
 #parse command line arguments
 for x in args:
     if x.startswith("-") == True and x.endswith("-") == False:
-        if x == "--help":
+        if "--help" in x:
             print(help_message)
             exit(0)
-        if x == "--version":
+        if "--version" in x:
             print(version_message)
             exit(0)
         if "--show-all" in x or "A" in x:
