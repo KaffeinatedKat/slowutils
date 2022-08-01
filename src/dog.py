@@ -31,7 +31,7 @@ Examples:
   {file} f - g  Output f's contents, then standard input, then g's contents.
   {file}        Copy standard input to standard output.
 """
-version_message = f"""dog (pyutils) 2022.07.29
+version_message = f"""dog (pyutils) 2022.08.01
 Written by John Crawford"""
 
 
@@ -74,7 +74,7 @@ def output(file, line_count, line_end):
 
 #parse command line arguments
 for x in args:
-    if x.startswith("-") == True and x.endswith("-") == False:
+    if x.startswith("-") and not x.endswith("-"):
         if "--help" in x:
             print(help_message)
             exit(0)
