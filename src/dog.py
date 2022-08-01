@@ -78,23 +78,21 @@ for x in args:
         if x == "--help":
             print(help_message)
             exit(0)
-        elif x == "--version":
+        if x == "--version":
             print(version_message)
             exit(0)
-        elif x == "--show-all" or x == "-A":
+        if "--show-all" in x or "A" in x:
             arg_list.append("E")
             arg_list.append("T")
-        elif x == "--show-tabs":
+        if "--show-tabs" in x or "T" in x:
             arg_list.append("T")
-        elif x == "--show-ends":
+        if "--show-ends" in x or "E" in x:
             arg_list.append("E")
-        elif x == "--number-nonblank" or x == "-b":
+        if "--number-nonblank" in x or "b" in x:
             arg_list.append("b")
             arg_list.append("n")
-        elif x == "--number":
+        if "--number" in x or "n" in x:
             art_list.append("n")
-        else:
-            arg_list += x.replace("-", "")       
     else:
         new_args += [x]
 
