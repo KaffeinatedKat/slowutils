@@ -31,8 +31,7 @@ version_message = f"""dog (pyutils) 2022.08.02
 Written by John Crawford"""
 
 
-#stdin
-def stdin():
+def stdin(): #standard input
         while True:
             try:
                 print(input())
@@ -42,8 +41,7 @@ def stdin():
                 exit(0)
 
 
-#print file line by line
-def output(file, arg_list):
+def output(file, arg_list): #print file line by line
     c = 1
     line_end = None
     line_count = ""
