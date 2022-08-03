@@ -31,38 +31,33 @@ version_message = f"""dog (pyutils) 2022.08.02
 Written by John Crawford"""
 
 
+def count_lines(arg_list, row_count, line, condition):
+    if "-n" in arg_list or "-b" in arg_list: #show line count
+        line_count = f"{row_count:>6}  "
+    if line == condition and "-b" in arg_list: #dont count empty lines
+        line_count = ""
+        row_count -= 1
+    return row_count, line_count
+
 def stdin(line_count, line_end, tab, arg_list, row_count): #standard input
     while True:
         try:
             line = input()
-
-            if "-n" in arg_list or "-b" in arg_list: #show line count
-                line_count = f"{row_count:>6}  "
-            if line == "" and "-b" in arg_list: #dont count empty lines
-                line_count = ""
-                row_count -= 1
-
+            row_count, line_count = count_lines(arg_list, row_count, line, "")
             row_count += 1
             print("{0}{1}".format(line_count, line.replace("\t", tab)), end=line_end)
         except EOFError:
             break
         except KeyboardInterrupt:
             exit(0)
-
     return row_count #return row_count for future lines
 
 
 def output(file, arg_list, tab, line_end, line_count, row_count): #print file line by line
     with open(file) as f:
         line = f.readline().replace("\t", tab)
-        
         while line:
-            if "-n" in arg_list or "-b" in arg_list:
-                line_count = f"{row_count:>6}  "
-            if line == "\n" and "-b" in arg_list:
-                line_count = ""
-                row_count -= 1
-            
+            row_count, line_count = count_lines(arg_list, row_count, line, "\n")
             line = line.rstrip("\n")
             print(f"{line_count}{line}", end=line_end)
             line = f.readline().replace("\t", tab)
