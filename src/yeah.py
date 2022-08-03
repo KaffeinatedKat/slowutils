@@ -12,7 +12,7 @@ Repeatedly output a line with all specified STRING(s), or 'y'.
       --help        display this help and exit
       --version     output version information and exit
 """
-version_message = f"""yeah (pythonutils) 2022.07.29
+version_message = f"""yeah (pyutils) 2022.08.02
 Written by John Crawford"""
 
 
