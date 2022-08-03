@@ -14,24 +14,31 @@ Repeatedly output a line with all specified STRING(s), or 'y'.
 """
 version_message = f"""yeah (pythonutils) 2022.07.29
 Written by John Crawford"""
-args = " ".join(sys.argv[1:])
 
 
-for x in sys.argv:
-    if x == "--help":
-        print(help_message)
-        exit(0)
-    elif x == "--version":
-        print(version_message)
-        exit(0)
+def get_args():
+    args = " ".join(sys.argv[1:])
+    for x in sys.argv:
+        match x:
+            case "--help":
+                print(help_message)
+                exit(0)
+            case "--version":
+                print(version_message)
+                exit(0)
+    return args
 
 
-if not args:
-    args = "y"
+def main():
+    args = get_args()
 
-while True:
-    try:
-        print(args)
-    except KeyboardInterrupt:
-        break
+    if not args:
+        args = "y"
+    while True:
+        try:
+            print(args)
+        except KeyboardInterrupt:
+            break
 
+if __name__ == "__main__":
+    main()
