@@ -35,7 +35,6 @@ def stdin(line_count, line_end, tab, arg_list, row_count): #standard input
     while True:
         try:
             line = input()
-            print(line)
 
             if "-n" in arg_list or "-b" in arg_list: #show line count
                 line_count = f"{row_count:>6}  "
