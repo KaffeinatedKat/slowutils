@@ -15,6 +15,7 @@ class Options:
     recursive = False
     force = False
     empty_folder = False
+    verbose = False
     path = ""
 
 
@@ -56,23 +57,34 @@ assurance that the contents are truly unrecoverable, consider using shred(1)."""
 
 def delete_file(Object, Error):
     try:
-        os.remove(Object.path) 
+        os.remove(Object.path)
     except FileNotFoundError:
         if not Object.force:
             Error.FileNotFound(Object)
+            return 0
+
+    if Object.verbose:
+        print(f"removed '{Object.path}'")
 
 
 def delete_folder(Object, Error):
+    if Object.empty_folder and Object.recursive:
+        try:
+            os.rmdir(Object.path)
+        except OSError:
+            shutil.rmtree(Object.path)
+        return
+
     if Object.empty_folder: #remove empty directories
         try:
             os.rmdir(Object.path)
         except OSError:
             Error.FolderNotEmpty(Object) # -f does not ignore "Directory not empty" error
-        return 0
+        return
 
     if Object.recursive: 
         shutil.rmtree(Object.path)
-    elif not Object.force: # ignore errors
+    elif not Object.recursive:
         Error.IsAFolder(Object)
 
 
@@ -99,6 +111,8 @@ def get_args(Object, Error):
                 Object.force = True
             if "-d" in x.lower() or "--dir" in x:
                 Object.empty_folder = True
+            if "-v" in x.lower() or "--verbose" in x:
+                Object.verbose = True
         else:
             Object.files.append(x)
 
