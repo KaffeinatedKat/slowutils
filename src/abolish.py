@@ -48,13 +48,12 @@ def delete_folder(Object, Error):
         try:
             os.rmdir(Object.path)
         except OSError:
-            Error.FolderNotEmpty(Object)
+            Error.FolderNotEmpty(Object) #force does not ignore "Directory not empty" error
         return 0
 
     if Object.recursive: 
         shutil.rmtree(Object.path)
- 
-    if not Object.force: #ignore errors
+    elif not Object.force: #ignore errors
         Error.IsAFolder(Object)
 
 
