@@ -60,6 +60,7 @@ assurance that the contents are truly unrecoverable, consider using shred(1)."""
 
 def delete_file(Object, Error):
     Object.verbose_message = "removed"
+    
     try:
         os.remove(Object.path)
         Object.success = True
@@ -71,11 +72,9 @@ def delete_file(Object, Error):
 
 def delete_folder(Object, Error):
     Object.verbose_message = "removed directory"
-    if Object.empty_folder and Object.recursive:
-        try:
-            os.rmdir(Object.path)
-        except OSError:
-            shutil.rmtree(Object.path)
+    
+    if Object.recursive: 
+        shutil.rmtree(Object.path)
         Object.success = True
         return
 
@@ -87,12 +86,8 @@ def delete_folder(Object, Error):
             Error.FolderNotEmpty(Object) # -f does not ignore "Directory not empty" error
         return
 
-    if Object.recursive: 
-        shutil.rmtree(Object.path)
-        Object.success = True
-    elif not Object.recursive:
+    if not Object.recursive:
         Error.IsAFolder(Object)
-
 
 def get_args(Object, Error):
     for x in sys.argv[1:]: 
@@ -134,15 +129,17 @@ def main():
         exit(1)
 
     for x in Opts.files: #parse files/folders to delete
+        Opts.success = False
         Opts.path = x
         Opts.folder = os.path.isdir(os.path.join(Opts.path)) # directory or file?
+        
         if Opts.folder:
             delete_folder(Opts, Error)
-        else:
+        elif not Opts.folder:
             delete_file(Opts, Error)
         
-        if Opts.verbose and Opts.success:
-            print(f"{Opts.verbose_message} '{Opts.path}'")
+        if Opts.verbose and Opts.success: # print verbose message if file deletion successful
+           print(f"{Opts.verbose_message} '{Opts.path}'")
 
 
 if __name__ == '__main__':
