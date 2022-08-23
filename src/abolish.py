@@ -16,7 +16,10 @@ class Options:
     force = False
     empty_folder = False
     verbose = False
+    success = False
+    verbose_message = ""
     path = ""
+
 
 
 class Exceptions(Options):
@@ -56,34 +59,37 @@ assurance that the contents are truly unrecoverable, consider using shred(1)."""
 
 
 def delete_file(Object, Error):
+    Object.verbose_message = "removed"
     try:
         os.remove(Object.path)
+        Object.success = True
     except FileNotFoundError:
         if not Object.force:
             Error.FileNotFound(Object)
             return 0
 
-    if Object.verbose:
-        print(f"removed '{Object.path}'")
-
 
 def delete_folder(Object, Error):
+    Object.verbose_message = "removed directory"
     if Object.empty_folder and Object.recursive:
         try:
             os.rmdir(Object.path)
         except OSError:
             shutil.rmtree(Object.path)
+        Object.success = True
         return
 
     if Object.empty_folder: #remove empty directories
         try:
             os.rmdir(Object.path)
+            Object.success = True
         except OSError:
             Error.FolderNotEmpty(Object) # -f does not ignore "Directory not empty" error
         return
 
     if Object.recursive: 
         shutil.rmtree(Object.path)
+        Object.success = True
     elif not Object.recursive:
         Error.IsAFolder(Object)
 
@@ -134,6 +140,9 @@ def main():
             delete_folder(Opts, Error)
         else:
             delete_file(Opts, Error)
+        
+        if Opts.verbose and Opts.success:
+            print(f"{Opts.verbose_message} '{Opts.path}'")
 
 
 if __name__ == '__main__':
