@@ -6,9 +6,6 @@ import sys
 import os
 import shutil
 
-help_message = """-r, -R, --recursive    remove directories and their contents recursively
--b, -B, --tester    idek, test and find out"""
-
 
 class Options:
     program = sys.argv[0]
@@ -33,6 +30,28 @@ class Exceptions(Options):
 
     def FolderNotEmpty(self, Object):
         print(f"{self.program}: cannot abolish '{Object.path}': Directory not empty")
+
+
+help_message = f"""Usage: {Options.program} [OPTION]... [FILE]...
+Remove (unlink) the FILE(s).
+
+  -f, --force           ignore nonexistent files and arguments, never prompt
+  -r, -R, --recursive   remove directories and their contents recursively
+  -d, --dir             remove empty directories
+      --help        display this help and exit
+      --version     output version information and exit
+
+By default, rm does not remove directories.  Use the --recursive (-r or -R)
+option to remove each listed directory, too, along with all of its contents.
+
+To remove a file whose name starts with a '-', for example '-foo',
+use this command:
+
+  {Options.program} ./-foo
+
+Note that if you use abolish to remove a file, it might be possible to recover
+some of its contents, given sufficient expertise and/or time.  For greater
+assurance that the contents are truly unrecoverable, consider using shred(1)."""
 
 
 def delete_file(Object, Error):
