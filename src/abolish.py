@@ -37,7 +37,7 @@ class Exceptions(Options):
 
 def delete_file(Object, Error):
     try:
-        os.remove(Object.path)
+        os.remove(Object.path) 
     except FileNotFoundError:
         if not Object.force:
             Error.FileNotFound(Object)
@@ -48,24 +48,24 @@ def delete_folder(Object, Error):
         try:
             os.rmdir(Object.path)
         except OSError:
-            Error.FolderNotEmpty(Object) #force does not ignore "Directory not empty" error
+            Error.FolderNotEmpty(Object) # -f does not ignore "Directory not empty" error
         return 0
 
     if Object.recursive: 
         shutil.rmtree(Object.path)
-    elif not Object.force: #ignore errors
+    elif not Object.force: # ignore errors
         Error.IsAFolder(Object)
 
 
 def get_args(Object, Error):
     for x in sys.argv[1:]: 
-        if x.startswith("--"): #add long options as one entry
+        if x.startswith("--"): # add long options as one entry
             Object.args.append(x)
-        elif x.startswith("-"): #add combined short options indivdually
+        elif x.startswith("-"): # add combined short options indivdually
             for z in list(x):
-                if z != "-": #prevent ["--"] from being added
+                if z != "-": # prevent ["--"] from being added
                     Object.args += [f"-{z}"]
-        else: #add everything else normally
+        else: # add everything else normally
             Object.args.append(x)
 
     for x in Object.args:
@@ -76,8 +76,6 @@ def get_args(Object, Error):
             if "-r" in x.lower() or "--recursive" in x: #recursive '-r'
                 print("delete that bad boi")
                 Object.recursive = True
-            if "-b" in x.lower() or "--tester" in x:
-                print("some thing idek lol")
             if "-f" in x.lower() or "--force" in x:
                 Object.force = True
             if "-d" in x.lower() or "--dir" in x:
@@ -98,7 +96,7 @@ def main():
 
     for x in Opts.files: #parse files/folders to delete
         Opts.path = x
-        Opts.folder = os.path.isdir(os.path.join(Opts.path))
+        Opts.folder = os.path.isdir(os.path.join(Opts.path)) # directory or file?
         if Opts.folder:
             delete_folder(Opts, Error)
         else:
