@@ -22,14 +22,15 @@ sudo ./install.sh
 ## dog - ([cat](https://github.com/coreutils/coreutils/blob/master/src/cat.c))
 concatenate files and print on the standard output
 
-* unsupported options
+* unsupported features
 * `-v, --show-nonprinting` (or related options)
 * `-s, --squeeze-blank` 
 
 ## abolish - ([rm](https://github.com/coreutils/coreutils/blob/master/src/rm.c))
 file deletion utility
 
-* unsupported options
+* unsupported features
+*  `sure you want to delete all x files in directory?`
 * `-i prompt before every removal`
 * `-I promt one before removing more than three files, or recursively`
 * `--interactive prompt according to WHEN: never, once (-I), or always (-i); without WHEN, prompt always`
