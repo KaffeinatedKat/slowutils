@@ -30,7 +30,6 @@ concatenate files and print on the standard output
 file deletion utility
 
 * unsupported features
-*  `sure you want to delete all x files in directory?`
 * `-i prompt before every removal`
 * `-I promt one before removing more than three files, or recursively`
 * `--interactive prompt according to WHEN: never, once (-I), or always (-i); without WHEN, prompt always`
