@@ -22,18 +22,20 @@ sudo ./install.sh
 ## dog - ([cat](https://github.com/coreutils/coreutils/blob/master/src/cat.c))
 concatenate files and print on the standard output
 
-* does not support `-v, --show-nonprinting` (or related options)
-* does not support `-s, --squeeze-blank` 
+* unsupported options
+* `-v, --show-nonprinting` (or related options)
+* `-s, --squeeze-blank` 
 
 ## abolish - ([rm](https://github.com/coreutils/coreutils/blob/master/src/rm.c))
 file deletion utility
 
-* does not support ``-i prompt before every removal\n
--I promt one before removing more than three files, or recursively\n
---interactive prompt according to WHEN: never, once (-I), or always (-i); without WHEN, prompt always\n
---one-file-system when removing a hierarchy recursively, skip any directory that is on a file system different from that of the corresponding command line argument\n
---no-preserve-root do not treat '/' specially\n
---preserve-root[all] do not remove '/'``
+* unsupported options
+* `-i prompt before every removal`
+* `-I promt one before removing more than three files, or recursively`
+* `--interactive prompt according to WHEN: never, once (-I), or always (-i); without WHEN, prompt always`
+* `--one-file-system when removing a hierarchy recursively, skip any directory that is on a file system different from that of the corresponding command line argument`
+* `--no-preserve-root do not treat '/' specially`
+* `--preserve-root[all] do not remove '/'`
 
 ## yeah - ([yes](https://github.com/coreutils/coreutils/blob/master/src/yes.c))
 output a string repeatedly until killed
