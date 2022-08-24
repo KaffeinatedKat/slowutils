@@ -106,7 +106,6 @@ def get_args(Object, Error):
                 print(help_message)
                 exit(0)
             if "-r" in x.lower() or "--recursive" in x: #recursive '-r'
-                print("delete that bad boi")
                 Object.recursive = True
             if "-f" in x.lower() or "--force" in x:
                 Object.force = True
