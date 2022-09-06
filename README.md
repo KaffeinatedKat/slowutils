@@ -30,7 +30,6 @@ concatenate files and print on the standard output
 file deletion utility
 
 * unsupported features
-* `-i prompt before every removal`
 * `-I promt one before removing more than three files, or recursively`
 * `--interactive prompt according to WHEN: never, once (-I), or always (-i); without WHEN, prompt always`
 * `--one-file-system when removing a hierarchy recursively, skip any directory that is on a file system different from that of the corresponding command line argument`
