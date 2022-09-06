@@ -61,13 +61,14 @@ class Exceptions(Variables):
 
 
 class Path:
-    path = ""
-    is_file = False
-    is_folder = False
-    is_symlink = False
+    def __init__(self):
+        self.path = ""
+        self.is_file = False
+        self.is_folder = False
+        self.is_symlink = False
 
     def get_type(self):
-        self.is_file = os.path.isdir(self.path)
+        self.is_file = not os.path.isdir(self.path)
         self.is_folder = os.path.isdir(self.path)
         self.is_symlink = os.path.islink(self.path)
 
@@ -86,7 +87,7 @@ class Path:
             else:
                 Error.IsAFolder(self)
 
-        elif not self.is_folder:
+        elif self.is_file:
             if stdin(f"{Vars.program}: remove regular file '{self.path}'? ").lower().startswith("y"):
                 self.delete(Vars, Error)
 
@@ -106,7 +107,7 @@ class Path:
                 if not Vars.force:
                     Error.FileNotFound(self)
 
-        elif self.is_file: # directories
+        elif self.is_folder: # directories
             Vars.verbose_message = "removed directory"
     
             if Vars.recursive: # delete full directories
