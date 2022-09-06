@@ -38,9 +38,5 @@ file deletion utility
 ## yeah - ([yes](https://github.com/coreutils/coreutils/blob/master/src/yes.c))
 output a string repeatedly until killed
 
-* program behaves identically to `yes`
-
 ## isthatme ([whoami](https://github.com/coreutils/coreutils/blob/master/src/whoami.c))
 print effective userid
-
-* program should behave identically to `whoami`
