@@ -17,22 +17,26 @@ class Variables:
     verbose = False
     success = False
     annoy = False
+    less_annoy = False
     delete_empty = False
     verbose_message = ""
 
     help_message = f"""Usage: {program} [OPTION]... [FILE]...
-Remove (unlink) the FILE(s).
-  -i                    prompt before every removal
+Remove (unlink) the FILE(s).\n
   -f, --force           ignore nonexistent files and arguments, never prompt
+  -i                    prompt before every removal
+  -I                    prompt once before removing more than three files, or
+                          when removing recursively; less intrusive than -i,
+                          while still giving protection against most mistakes
   -r, -R, --recursive   abolish directories and their contents recursively
   -d, --dir             abolish empty directories
       --help        display this help and exit
-      --version     output version information and exit
+      --version     output version information and exit\n
 By default, abolish does not abolish directories.  Use the --recursive (-r or -R)
-option to abolish each listed directory, too, along with all of its contents.
+option to abolish each listed directory, too, along with all of its contents.\n
 To abolish a file whose name starts with a '-', for example '-foo',
 use this command:
-  {program} ./-foo
+  {program} ./-foo\n
 Note that if you use abolish to abolish a file, it might be possible to recover
 some of its contents, given sufficient expertise and/or time.  For greater
 assurance that the contents are truly unrecoverable, consider using shred(1)."""
@@ -62,6 +66,8 @@ class Path:
         self.is_file = False
         self.is_folder = False
         self.is_symlink = False
+        self.folder_count = 0
+        self.file_count = 0
         self.folders = []
 
     def get_type(self):
@@ -184,9 +190,16 @@ def get_args(Vars, File, Error):
                 Vars.delete_empty = True
             if "-v" in x.lower() or "--verbose" in x:
                 Vars.verbose = True
-            if "-i" in x.lower():
+            if "-i" in x:
                 Vars.annoy = True
+            if "-I" in x:
+                Vars.less_annoy = True
         else:
+            x = os.path.join(x)
+            if not os.path.isdir(x) or os.path.islink(x):
+                File.file_count += 1
+            else:
+                File.folder_count += 1
             Vars.files.append(x)
 
 
@@ -200,11 +213,13 @@ def main():
     if len(sys.argv[1:]) == 0: #exit with no input
         Error.MissingOperand()
         exit(1)
-    
-    c = 0
-    for x in Vars.files:
-        c += 1
 
+    if Vars.less_annoy and Vars.recursive:
+        if not stdin(f"{Vars.program}: abolish {File.folder_count + File.file_count} arguments recursively? ").lower().startswith("y"):
+            exit(1)
+    elif File.file_count > 3 and Vars.less_annoy:
+        if not stdin(f"{Vars.program}: abolish {File.file_count} arguments? ").lower().startswith("y"):
+            exit(1)
 
     for x in Vars.files: #parse files/folders to delete
         Vars.success = False
