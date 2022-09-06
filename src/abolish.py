@@ -70,11 +70,15 @@ class Path:
         self.is_symlink = os.path.islink(self.path)
 
 
-    def ask_delete(self, Vars, Error):
+    def abolish(self, Vars, Error):
         self.get_type()
+    
+        if not Vars.annoy:
+            self.delete(Vars, Error)
+            return
 
         if self.is_symlink:
-            if stdin(f"{Vars.program}: remove symbolic link '{self.path}'? "):
+            if stdin(f"{Vars.program}: abolish symbolic link '{self.path}'? "):
                 self.delete(Vars, Error)
         
         elif self.is_folder:
@@ -82,7 +86,7 @@ class Path:
                 Error.IsAFolder(self)
             elif len(os.listdir(self.path)) == 0: # if folder is empty
                 if Vars.delete_empty or Vars.recursive:
-                    if stdin(f"{Vars.program}: remove directory '{self.path}'? ").lower().startswith("y"):
+                    if stdin(f"{Vars.program}: abolish directory '{self.path}'? ").lower().startswith("y"):
                         self.delete(Vars, Error)
             elif Vars.recursive:
                 if not len(os.listdir(self.path)) == 0 and self.path not in self.folders: # decend into directory if folder not empty
@@ -91,7 +95,7 @@ class Path:
                         self.delete_folder(Vars, Error)
 
         elif self.is_file:
-            if stdin(f"{Vars.program}: remove regular file '{self.path}'? ").lower().startswith("y"):
+            if stdin(f"{Vars.program}: abolish regular file '{self.path}'? ").lower().startswith("y"):
                 self.delete(Vars, Error)
 
 
@@ -99,21 +103,24 @@ class Path:
     def delete_folder(self, Vars, Error):
         directory = self.path
         for x in os.listdir(self.path):
+            Vars.success = False
             self.path = os.path.join(directory + "/" + x)
-            self.ask_delete(Vars, Error)
-        
+            self.abolish(Vars, Error)
+
         self.path = directory
-        self.ask_delete(Vars, Error)
+        if len(os.listdir(self.path)) == 0:
+            Vars.verbose_message = "abolished directory"
+            os.rmdir(self.path)
 
 
 
     def delete(self, Vars, Error):
         if self.is_symlink:
-            Vars.verbose_message = "removed"
+            Vars.verbose_message = "abolished"
             os.unlink(self.path)
 
         elif self.is_file: # files
-            Vars.verbose_message = "removed"
+            Vars.verbose_message = "abolished"
             try:
                 os.remove(self.path)
                 Vars.success = True
@@ -122,18 +129,19 @@ class Path:
                     Error.FileNotFound(self)
 
         elif self.is_folder: # directories
-            Vars.verbose_message = "removed directory"
+            Vars.verbose_message = "abolished directory"
     
-            if Vars.recursive: # delete full directories
-                shutil.rmtree(self.path)
-                Vars.success = True
-
-            elif Vars.delete_empty: #remove empty directories
-                try:
+            if len(os.listdir(self.path)) == 0:
+                print(Vars.delete_empty)
+                if Vars.delete_empty:
                     os.rmdir(self.path)
-                    Vars.success = True
-                except OSError:
-                    Error.FolderNotEmpty(self) # -f does not ignore "Directory not empty" error
+                else:
+                    Error.FolderNotEmpty(self)
+
+            elif Vars.recursive and self.path not in self.folders: # delete full directories
+                self.folders += [self.path]
+                self.delete_folder(Vars, Error)
+                Vars.success = True
 
             elif not Vars.recursive: # -r nor -d were set
                 Error.IsAFolder(self)
@@ -169,6 +177,7 @@ def get_args(Vars, File, Error):
                 exit(0)
             if "-r" in x.lower() or "--recursive" in x: #recursive '-r'
                 Vars.recursive = True
+                Vars.delete_empty = True
             if "-f" in x.lower() or "--force" in x:
                 Vars.force = True
             if "-d" in x.lower() or "--dir" in x:
@@ -195,15 +204,9 @@ def main():
     for x in Vars.files: #parse files/folders to delete
         Vars.success = False
         File.path = os.path.join(x)
-        File.get_type()
-        
-        
-        if Vars.annoy:
-            File.ask_delete(Vars, Error)
-        elif not Vars.annoy:
-            File.delete(Vars, Error)
-        
-        
+        File.abolish(Vars, Error)
+
+
 
 if __name__ == '__main__':
     main()
