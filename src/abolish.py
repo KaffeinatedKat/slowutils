@@ -101,14 +101,14 @@ class Path:
 
 
     def delete_folder(self, Vars, Error):
-        directory = self.path
-        for x in os.listdir(self.path):
+        directory = self.path # save path before folder
+        for x in os.listdir(self.path): # loop files in folder
             Vars.success = False
             self.path = os.path.join(directory + "/" + x)
             self.abolish(Vars, Error)
 
-        self.path = directory
-        if len(os.listdir(self.path)) == 0:
+        self.path = directory # return to path before the folder
+        if len(os.listdir(self.path)) == 0: # delete folder if empty
             Vars.verbose_message = "abolished directory"
             os.rmdir(self.path)
 
@@ -132,7 +132,6 @@ class Path:
             Vars.verbose_message = "abolished directory"
     
             if len(os.listdir(self.path)) == 0:
-                print(Vars.delete_empty)
                 if Vars.delete_empty:
                     os.rmdir(self.path)
                 else:
