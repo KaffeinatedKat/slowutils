@@ -66,6 +66,7 @@ class Path:
         self.is_file = False
         self.is_folder = False
         self.is_symlink = False
+        self.folders = []
 
     def get_type(self):
         self.is_file = not os.path.isdir(self.path)
@@ -74,25 +75,39 @@ class Path:
 
 
     def ask_delete(self, Vars, Error):
+        self.get_type()
+
         if self.is_symlink:
             if stdin(f"{Vars.program}: remove symbolic link '{self.path}'? "):
                 self.delete(Vars, Error)
         
         elif self.is_folder:
-            if len(os.listdir(self.path)) == 0 and Vars.delete_empty: # if --dir and folder is empty
-                if stdin(f"{Vars.program}: remove directory '{self.path}'? ").lower().startswith("y"):
-                    self.delete(Vars, Error)
-                return
-            if Vars.recursive:
-                print("sucks to suck, directory has stuff in it lmao")
-                if stdin(f"{Vars.program}: delete non empty directory '{self.path}'? ").lower().startswith("y"):
-                    self.delete(Vars, Error)
+            if len(os.listdir(self.path)) == 0: # if folder is empty
+                if Vars.delete_empty or Vars.recursive:
+                    if stdin(f"{Vars.program}: remove directory '{self.path}'? ").lower().startswith("y"):
+                        self.delete(Vars, Error)
+            elif Vars.recursive:
+                if not len(os.listdir(self.path)) == 0 and self.path not in self.folders: # decend into directory if folder not empty
+                    self.folders += [self.path] # dont decend back into a directory if you dont remove everything from that directory
+                    if stdin(f"{Vars.program}: decend into directory '{self.path}'? ").lower().startswith("y"):
+                        self.delete_folder(Vars, Error)
             else:
                 Error.IsAFolder(self)
 
         elif self.is_file:
             if stdin(f"{Vars.program}: remove regular file '{self.path}'? ").lower().startswith("y"):
                 self.delete(Vars, Error)
+
+
+
+    def delete_folder(self, Vars, Error):
+        directory = self.path
+        for x in os.listdir(self.path):
+            self.path = os.path.join(directory + "/" + x)
+            self.ask_delete(Vars, Error)
+        
+        self.path = directory
+        self.ask_delete(Vars, Error)
 
 
 
@@ -126,6 +141,9 @@ class Path:
 
             elif not Vars.recursive: # -r nor -d were set
                 Error.IsAFolder(self)
+
+        if Vars.verbose and Vars.success: # print verbose message if file deletion successful
+           print(f"{Vars.verbose_message} '{self.path}'")
 
 
 
@@ -189,9 +207,7 @@ def main():
         elif not Vars.annoy:
             File.delete(Vars, Error)
         
-        if Vars.verbose and Vars.success: # print verbose message if file deletion successful
-           print(f"{Vars.verbose_message} '{File.path}'")
-
+        
 
 if __name__ == '__main__':
     main()
