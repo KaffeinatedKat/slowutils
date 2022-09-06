@@ -130,8 +130,11 @@ class Path:
 
         elif self.is_folder: # directories
             Vars.verbose_message = "abolished directory"
-    
-            if len(os.listdir(self.path)) == 0:
+            
+            if not Vars.recursive and not Vars.delete_empty:
+                Error.IsAFolder(self)
+
+            elif len(os.listdir(self.path)) == 0:
                 if Vars.delete_empty:
                     os.rmdir(self.path)
                 else:
@@ -142,8 +145,6 @@ class Path:
                 self.delete_folder(Vars, Error)
                 Vars.success = True
 
-            elif not Vars.recursive: # -r nor -d were set
-                Error.IsAFolder(self)
 
         if Vars.verbose and Vars.success: # print verbose message if file deletion successful
            print(f"{Vars.verbose_message} '{self.path}'")
@@ -199,6 +200,11 @@ def main():
     if len(sys.argv[1:]) == 0: #exit with no input
         Error.MissingOperand()
         exit(1)
+    
+    c = 0
+    for x in Vars.files:
+        c += 1
+
 
     for x in Vars.files: #parse files/folders to delete
         Vars.success = False
