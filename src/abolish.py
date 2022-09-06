@@ -23,6 +23,7 @@ class Variables:
     help_message = f"""Usage: {program} [OPTION]... [FILE]...
 Remove (unlink) the FILE(s).
 
+  -i                    prompt before every removal
   -f, --force           ignore nonexistent files and arguments, never prompt
   -r, -R, --recursive   remove directories and their contents recursively
   -d, --dir             remove empty directories
@@ -82,7 +83,9 @@ class Path:
                 self.delete(Vars, Error)
         
         elif self.is_folder:
-            if len(os.listdir(self.path)) == 0: # if folder is empty
+            if not Vars.recursive:
+                Error.IsAFolder(self)
+            elif len(os.listdir(self.path)) == 0: # if folder is empty
                 if Vars.delete_empty or Vars.recursive:
                     if stdin(f"{Vars.program}: remove directory '{self.path}'? ").lower().startswith("y"):
                         self.delete(Vars, Error)
@@ -91,8 +94,6 @@ class Path:
                     self.folders += [self.path] # dont decend back into a directory if you dont remove everything from that directory
                     if stdin(f"{Vars.program}: decend into directory '{self.path}'? ").lower().startswith("y"):
                         self.delete_folder(Vars, Error)
-            else:
-                Error.IsAFolder(self)
 
         elif self.is_file:
             if stdin(f"{Vars.program}: remove regular file '{self.path}'? ").lower().startswith("y"):
