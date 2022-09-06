@@ -72,6 +72,7 @@ class Path:
         self.is_folder = os.path.isdir(self.path)
         self.is_symlink = os.path.islink(self.path)
 
+
     def ask_delete(self, Vars, Error):
         if self.is_symlink:
             if stdin(f"{Vars.program}: remove symbolic link '{self.path}'? "):
@@ -84,6 +85,8 @@ class Path:
                 return
             if Vars.recursive:
                 print("sucks to suck, directory has stuff in it lmao")
+                if stdin(f"{Vars.program}: delete non empty directory '{self.path}'? ").lower().startswith("y"):
+                    self.delete(Vars, Error)
             else:
                 Error.IsAFolder(self)
 
