@@ -24,7 +24,6 @@ concatenate files and print on the standard output
 
 * unsupported features
 * `-v, --show-nonprinting` (or related options)
-* `-s, --squeeze-blank` 
 
 ## abolish - ([rm](https://github.com/coreutils/coreutils/blob/master/src/rm.c))
 file deletion utility
