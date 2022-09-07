@@ -10,3 +10,4 @@ fi
 cp src/dog.py "$path"dog
 cp src/yeah.py "$path"yeah
 cp src/isthatme.py "$path"isthatme
+cp src/abolish.py "$path"abolish
