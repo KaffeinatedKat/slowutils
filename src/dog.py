@@ -70,10 +70,10 @@ class Path:
         with open(self.path) as f:
             self.current_line = f.readline().replace("\t", Vars.show_tabs)
             while self.current_line:
-                self.next_line = f.readline().replace("\t", Vars.show_tabs)
-                self.count_line(Vars)
+                self.next_line = f.readline().replace("\t", Vars.show_tabs)   
                 self.current_line = self.current_line.rstrip("\n")
-                
+                self.count_line(Vars)
+
                 if not Vars.surpress_empty: 
                     print(f"{self.show_line_count}{self.current_line}", end=Vars.show_ends)
                 elif Vars.surpress_empty:
