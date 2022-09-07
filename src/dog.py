@@ -11,7 +11,7 @@ class Variables:
     def __init__(self):
         self.program = sys.argv[0]
         self.args = sys.argv[1:]
-        self.options = ["-A", "--show-all", "-b", "--number-nonblank", "-E", "--show-ends", "-n", "--number", "-T", "--show-tabs", "-u", "--help", "--version", "-s"]
+        self.options = ["-A", "--show-all", "-b", "--number-nonblank", "-E", "--show-ends", "-n", "--number", "-T", "--show-tabs", "-u", "-s", "--squeeze-blank", "--help", "--version"]
         self.line_count = 1
         self.show_tabs = "\t"
         self.show_ends = None
@@ -28,16 +28,17 @@ With no FILE, or when FILE is -, read standard input.
   {self.options[2]},  {self.options[3]}     number nonempty print_line lines, overrides -n
   {self.options[4]},  {self.options[5]}           display $ at end of each line
   {self.options[6]},  {self.options[7]}              number all print_line lines
+  {self.options[11]}, {self.options[12]}        suppress repeated empty output lines
   {self.options[8]},  {self.options[9]}           display TAB characters as ^I
   {self.options[10]}                         (ignored)
-      {self.options[11]}        display this help and exit
-      {self.options[12]}     print_line version information and exit
+      {self.options[13]}        display this help and exit
+      {self.options[14]}     print_line version information and exit
 
 Examples:
   {self.program} f - g  Output f's contents, then standard input, then g's contents.
   {self.program}        Copy standard input to standard print_line.
 """
-        self.version_message = f"""dog (pyutils) 2022.09.06
+        self.version_message = f"""dog (pyutils) 2022.09.07
 Written by John Crawford"""
 
 
