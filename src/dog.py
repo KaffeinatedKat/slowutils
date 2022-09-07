@@ -1,137 +1,178 @@
 #!/usr/bin/python3
 
-# dog - concatenate files and print on the standard output
+# dog - concatenate files and print on the standard print_line
 
 import sys
 import os
 
-args = sys.argv[1:]
-program = sys.argv[0]
-options = ["-A", "--show-all", "-b", "--number-nonblank", "-E", "--show-ends", "-n", "--number", "-T", "--show-tabs", "-u", "--help", "--version"]
 
-help_message = f"""Usage: {program} [OPTION]... [FILE]...
-Concatenate FILE(s) to standard output.
+
+class Variables:
+    def __init__(self):
+        self.program = sys.argv[0]
+        self.args = sys.argv[1:]
+        self.options = ["-A", "--show-all", "-b", "--number-nonblank", "-E", "--show-ends", "-n", "--number", "-T", "--show-tabs", "-u", "--help", "--version", "-s"]
+        self.line_count = 1
+        self.show_tabs = "\t"
+        self.show_ends = None
+        self.surpress_empty = False
+        self.args = []
+        self.arg_list = []
+        self.file_list = []
+        self.help_message = f"""Usage: {self.program} [OPTION]... [FILE]...
+Concatenate FILE(s) to standard print_line.
 
 With no FILE, or when FILE is -, read standard input.
 
-  {options[0]},  {options[1]}            equivalent to -ET
-  {options[2]},  {options[3]}     number nonempty output lines, overrides -n
-  {options[4]},  {options[5]}           display $ at end of each line
-  {options[6]},  {options[7]}              number all output lines
-  {options[8]},  {options[9]}           display TAB characters as ^I
-  {options[10]}                         (ignored)
-      {options[11]}        display this help and exit
-      {options[12]}     output version information and exit
+  {self.options[0]},  {self.options[1]}            equivalent to -ET
+  {self.options[2]},  {self.options[3]}     number nonempty print_line lines, overrides -n
+  {self.options[4]},  {self.options[5]}           display $ at end of each line
+  {self.options[6]},  {self.options[7]}              number all print_line lines
+  {self.options[8]},  {self.options[9]}           display TAB characters as ^I
+  {self.options[10]}                         (ignored)
+      {self.options[11]}        display this help and exit
+      {self.options[12]}     print_line version information and exit
 
 Examples:
-  {program} f - g  Output f's contents, then standard input, then g's contents.
-  {program}        Copy standard input to standard output.
+  {self.program} f - g  Output f's contents, then standard input, then g's contents.
+  {self.program}        Copy standard input to standard print_line.
 """
-version_message = f"""dog (pyutils) 2022.08.02
+        self.version_message = f"""dog (pyutils) 2022.09.06
 Written by John Crawford"""
 
 
-def count_lines(arg_list, row_count, line, condition, line_count):
-    if "-n" in arg_list or "-b" in arg_list:
-        line_count = f"{row_count:>6}  "
-    if line == condition and "-b" in arg_list: #dont count empty lines
-        line_count = ""
-        row_count -= 1
-    row_count += 1
-    return row_count, line_count
+
+class Path:
+    def __init__(self):
+        self.last_line = ""
+        self.current_line = ""
+        self.next_line = ""
+        self.line_count = 1
+        self.show_line_count = ""
+        self.path = ""
 
 
-def stdin(line_count, line_end, tab, arg_list, row_count): #standard input
+    def count_line(self, Vars):
+        if "-n" in Vars.arg_list or "-b" in Vars.arg_list:
+            self.show_line_count = f"{self.line_count:>6}  "
+        if self.current_line == "" and "-b" in Vars.arg_list: #dont count empty lines
+            self.show_line_count = ""
+            self.line_count -= 1
+        self.line_count += 1
+        
+
+    def line_history(self):
+        self.last_line = self.current_line
+        self.current_line = self.next_line
+
+
+    def print_line(self, Vars): #print file line by line
+        with open(self.path) as f:
+            self.current_line = f.readline().replace("\t", Vars.show_tabs)
+            while self.current_line:
+                self.next_line = f.readline().replace("\t", Vars.show_tabs)
+                self.count_line(Vars)
+                self.current_line = self.current_line.rstrip("\n")
+                
+                if not Vars.surpress_empty: 
+                    print(f"{self.show_line_count}{self.current_line}", end=Vars.show_ends)
+                elif Vars.surpress_empty:
+                    if self.last_line == "" and self.current_line == "": # if current and last lines are empty, dont print current blank line
+                        self.line_count -= 1 # dont count surpressed lines
+                    else:
+                        print(f"{self.show_line_count}{self.current_line}", end=Vars.show_ends)
+
+                self.line_history()
+
+
+
+def stdin(Vars, File): #standard input
+    File.last_line = None
     while True:
         try:
-            line = input()
-            row_count, line_count = count_lines(arg_list, row_count, line, "", line_count)
-            print("{0}{1}".format(line_count, line.replace("\t", tab)), end=line_end)
+            File.current_line = input()
+            File.count_line(Vars)
+            if not Vars.surpress_empty: 
+                print(f"{File.show_line_count}{File.current_line}", end=Vars.show_ends)
+            elif Vars.surpress_empty:
+                if File.last_line == "" and File.current_line == "": # if current and last lines are empty, dont print current blank line
+                    File.line_count -= 1 # dont count surpressed lines
+                else:
+                    print(f"{File.show_line_count}{File.current_line}", end=Vars.show_ends)
+
+            File.line_history()
+
         except EOFError:
             break
         except KeyboardInterrupt:
             exit(0)
-    return row_count #return row_count for future lines
 
 
-def output(file, arg_list, tab, line_end, line_count, row_count): #print file line by line
-    with open(file) as f:
-        line = f.readline().replace("\t", tab)
-        while line:
-            row_count, line_count = count_lines(arg_list, row_count, line, "\n", line_count)
-            line = line.rstrip("\n")
-            print(f"{line_count}{line}", end=line_end)
-            line = f.readline().replace("\t", tab)
 
-    return row_count #return row_count for future lines
-
-
-def get_args(): #parse command line arguments
-    args, arg_list, file_list = [], [], []
-    tab = "\t"
-    line_end = None
-    line_count = ""
-    row_count = 1
-    
+def get_args(Vars, File): #parse command line arguments
     for x in sys.argv[1:]:
         if x.startswith("--"): #add arguments such as --show-tabs into array as ['--show-tabs']
-            args.append(x)
+            Vars.args.append(x)
         elif x.startswith("-") and not x.endswith("-"): #add arguments such as -bET into array as ['-b', '-E', '-T']
             for z in list(x):
                 if z != "-":
-                    args += [f"-{z}"]
+                    Vars.args += [f"-{z}"]
         else: #add everything else normally
-            args.append(x)
+            Vars.args.append(x)
         
-    for x in args:
+    for x in Vars.args:
         if x.startswith("-") and not x.endswith("-"): #check for arguments (ex. -b)
-            if x not in options: #exit with invalid options
-                print("{0}: invalid option -- '{1}'\nTry '{2}' --help' for more information.".format(program, x.replace("-", ""), program))
+            if x not in Vars.options: #exit with invalid options
+                print("{0}: invalid option -- '{1}'\nTry '{2}' --help' for more information.".format(Vars.program, x.replace("-", ""), Vars.program))
                 exit(1)   
 
             if "--help" in x:
-                print(help_message)
+                print(Vars.help_message)
                 exit(0)
             if "--version" in x:
-                print(version_message)
+                print(Vars.version_message)
                 exit(0)
             if "--show-all" in x or "A" in x:
                 x = "-A"
-                line_end = "$\n"
-                tab = "^I"
-                arg_list += [x]
+                Vars.show_ends = "$\n"
+                Vars.show_tabs = "^I"
+                Vars.arg_list += [x]
             if "--show-tabs" in x or "T" in x:
                 x = "-T"
-                tab = "^I"
-                arg_list += [x]
+                Vars.show_tabs = "^I"
+                Vars.arg_list += [x]
             if "--show-ends" in x or "E" in x:
                 x = "-E"
-                line_end = "$\n"
-                arg_list += [x]
+                Vars.show_ends = "$\n"
+                Vars.arg_list += [x]
             if "--number-nonblank" in x or "b" in x:
                 x = "-b"
-                arg_list += [x]
+                Vars.arg_list += [x]
             if "--number" in x or "n" in x:
                 x = "-n"
-                arg_list += [x]
-        else: #everything else goes to into output()
-            file_list.append(x)
+                Vars.arg_list += [x]
+            if "s" in x:
+                Vars.surpress_empty = True
+        else: #everything else goes to into print_line()
+            Vars.file_list.append(x)
 
-    return arg_list, file_list, tab, line_end, line_count, row_count
 
 
 def main():
-    arg_list, file_list, tab, line_end, line_count, row_count = get_args()
-    
-    if sys.argv[1:] == []: #read stdin if no file is provided
-        stdin(line_count, line_end, tab, arg_list, row_count)
+    Vars = Variables()
+    File = Path()
+    get_args(Vars, File)
 
-    for x in file_list: #loop through files
+    if sys.argv[1:] == []: #read stdin if no file is provided
+        stdin(Vars, File)
+
+    for x in Vars.file_list: #loop through files
         if x == "-": #stdin if file is '-'
-            row_count = stdin(line_count, line_end, tab, arg_list, row_count)
+            stdin(Vars, File)
         else:
             try:
-                row_count = output(x, arg_list, tab, line_end, line_count, row_count)
+                File.path = os.path.join(x)
+                File.print_line(Vars)
             except FileNotFoundError:
                 print(f"{program}: {x}: No such file or directory")
                 exit(1)
