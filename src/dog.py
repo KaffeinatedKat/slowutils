@@ -11,11 +11,11 @@ class Variables:
     def __init__(self):
         self.program = sys.argv[0]
         self.args = sys.argv[1:]
-        self.options = ["-A", "--show-all", "-b", "--number-nonblank", "-E", "--show-ends", "-n", "--number", "-T", "--show-tabs", "-u", "-s", "--squeeze-blank", "-v", "--help", "--version"]
+        self.options = ["-A", "--show-all", "-b", "--number-nonblank", "-E", "--show-ends", "-n", "--number", "-T", "--show-tabs", "-u", "-s", "--squeeze-blank", "-v", "--show-nonprinting", "-e", "-t", "--help", "--version"]
         self.line_count = 1
         self.show_tabs = "\t"
         self.show_ends = "\n"
-        self.surpress_empty = False
+        self.suppress_empty = False
         self.show_nonprinting = False
         self.args = []
         self.arg_list = []
@@ -25,15 +25,18 @@ Concatenate FILE(s) to standard print_line.
 
 With no FILE, or when FILE is -, read standard input.
 
-  {self.options[0]},  {self.options[1]}            equivalent to -ET
-  {self.options[2]},  {self.options[3]}     number nonempty print_line lines, overrides -n
-  {self.options[4]},  {self.options[5]}           display $ at end of each line
-  {self.options[6]},  {self.options[7]}              number all print_line lines
-  {self.options[11]}, {self.options[12]}        suppress repeated empty output lines
-  {self.options[8]},  {self.options[9]}           display TAB characters as ^I
-  {self.options[10]}                         (ignored)
-      {self.options[13]}        display this help and exit
-      {self.options[14]}     print_line version information and exit
+  {self.options[0]}, {self.options[1]}           equivalent to -vET
+  {self.options[2]}, {self.options[3]}    number nonempty print_line lines, overrides -n
+  {self.options[15]}                       equivalent to -vE
+  {self.options[4]}, {self.options[5]}          display $ at end of each line
+  {self.options[6]}, {self.options[7]}             number all print_line lines
+  {self.options[11]}, {self.options[12]}      suppress repeated empty output lines
+  {self.options[16]}                       equivalent to -vT
+  {self.options[8]},  {self.options[9]}         display TAB characters as ^I
+  {self.options[10]}                       (ignored)
+  {self.options[13]}, {self.options[14]}   use ^ and M- notation, except for LFD and TAB
+      {self.options[17]}        display this help and exit
+      {self.options[18]}     print_line version information and exit
 
 Examples:
   {self.program} f - g  Output f's contents, then standard input, then g's contents.
@@ -96,7 +99,7 @@ class Path:
                         self.current_line += byte
 
                 if byte == b'\n': # line has ended
-                    if not Vars.surpress_empty:
+                    if not Vars.suppress_empty:
                         print(f"{self.show_line_count}{self.current_line.decode()}", end=Vars.show_ends)
                     else:
                         if self.current_line == bytearray(b'') and self.last_line == bytearray(b''):
@@ -112,27 +115,6 @@ class Path:
             if Vars.show_nonprinting:
                 print(f"{self.show_line_count}{self.current_line.decode()}", end="")
 
-                
-
-
-        #else:
-            #with open(self.path, mode=self.mode) as f:
-                #self.current_line = f.readline().replace("\t", Vars.show_tabs)
-                #while self.current_line:
-                    #self.next_line = f.readline().replace("\t", Vars.show_tabs)  
-                    #self.current_line = self.current_line.rstrip("\n")
-                    #self.count_line(Vars)
-
-                    #if not Vars.surpress_empty:
-                    #    print(f"{self.show_line_count}{self.current_line}\r", end=Vars.show_ends)
-                    #elif Vars.surpress_empty:
-                        #if self.last_line == "" and self.current_line == "": # if current and last lines are empty, dont print current blank line
-                       #     self.line_count -= 1 # dont count surpressed lines
-                      #  else:
-                     #       print(f"{self.show_line_count}{self.current_line}\r", end=Vars.show_ends)
-
-                    #self.line_history()
-
 
 
 def stdin(Vars, File): #standard input
@@ -141,11 +123,11 @@ def stdin(Vars, File): #standard input
         try:
             File.current_line = input()
             File.count_line(Vars)
-            if not Vars.surpress_empty:
+            if not Vars.suppress_empty:
                 print(f"{File.show_line_count}{File.current_line}\r", end=Vars.show_ends)
-            elif Vars.surpress_empty:
+            elif Vars.suppress_empty:
                 if File.last_line == "" and File.current_line == "": # if current and last lines are empty, dont print current blank line
-                    File.line_count -= 1 # dont count surpressed lines
+                    File.line_count -= 1 # dont count suppressed lines
                 else:
                     print(f"{File.show_line_count}{File.current_line}\r", end=Vars.show_ends)
 
@@ -182,27 +164,28 @@ def get_args(Vars, File): #parse command line arguments
                 print(Vars.version_message)
                 exit(0)
             if "--show-all" in x or "A" in x:
-                x = "-A"
                 Vars.show_ends = "$\n"
                 Vars.show_tabs = "^I"
                 Vars.arg_list += [x]
             if "--show-tabs" in x or "T" in x:
-                x = "-T"
                 Vars.show_tabs = "^I"
                 Vars.arg_list += [x]
             if "--show-ends" in x or "E" in x:
-                x = "-E"
                 Vars.show_ends = "$\n"
                 Vars.arg_list += [x]
             if "--number-nonblank" in x or "b" in x:
-                x = "-b"
                 Vars.arg_list += [x]
             if "--number" in x or "n" in x:
-                x = "-n"
                 Vars.arg_list += [x]
-            if "s" in x:
-                Vars.surpress_empty = True
-            if "v" in x:
+            if "--squeeze-blank" or "s" in x:
+                Vars.suppress_empty = True
+            if "--show-nonprinting" or "v" in x:
+                Vars.show_nonprinting = True
+            if "e" in x:
+                Vars.show_ends = "$\n"
+                Vars.show_nonprinting = True
+            if "t" in x:
+                Vars.show_tabs = "^I"
                 Vars.show_nonprinting = True
         else: #everything else goes to into print_line()
             Vars.file_list.append(x)
