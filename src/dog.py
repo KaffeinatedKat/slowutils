@@ -14,7 +14,7 @@ class Variables:
         self.options = ["-A", "--show-all", "-b", "--number-nonblank", "-E", "--show-ends", "-n", "--number", "-T", "--show-tabs", "-u", "-s", "--squeeze-blank", "-v", "--help", "--version"]
         self.line_count = 1
         self.show_tabs = "\t"
-        self.show_ends = ""
+        self.show_ends = "\n"
         self.surpress_empty = False
         self.show_nonprinting = False
         self.args = []
@@ -72,23 +72,9 @@ class Path:
             self.current_line = bytearray()
             self.last_line = bytearray()
             self.count_line(Vars)
-            byte = f.read(1)                
-            while byte:
-                if byte == b'\n': # line has ended
-                    if not Vars.surpress_empty:
-                        print(f"{self.show_line_count}{self.current_line.decode()}")
-                    else:
-                        if self.current_line == bytearray(b'') and self.last_line == bytearray(b''):
-                            self.line_count -= 1
-                        else:
-                            print(f"{self.show_line_count}{self.current_line.decode()}")
+            byte = f.read(1)
 
-                    self.last_line = self.current_line
-                    self.current_line = bytearray()  
-                    
-                    #self.current_line += str.encode(f"{Vars.show_ends}\n{self.show_line_count}")
-                    self.count_line(Vars)
-               
+            while byte:   
                 if Vars.show_nonprinting:
                     if byte == b'\x09':
                         self.current_line += b'\t'
@@ -109,7 +95,25 @@ class Path:
                     if b'\x20' <= byte <= b'\x7e':
                         self.current_line += byte
 
+                if byte == b'\n': # line has ended
+                    if not Vars.surpress_empty:
+                        print(f"{self.show_line_count}{self.current_line.decode()}", end=Vars.show_ends)
+                    else:
+                        if self.current_line == bytearray(b'') and self.last_line == bytearray(b''):
+                            self.line_count -= 1
+                        else:
+                            print(f"{self.show_line_count}{self.current_line.decode()}", end=Vars.show_ends)
+
+                    self.last_line = self.current_line
+                    self.current_line = bytearray()  
+                    self.count_line(Vars)
                 byte = f.read(1)
+
+            if Vars.show_nonprinting:
+                print(f"{self.show_line_count}{self.current_line.decode()}", end="")
+
+                
+
 
         #else:
             #with open(self.path, mode=self.mode) as f:
@@ -179,7 +183,7 @@ def get_args(Vars, File): #parse command line arguments
                 exit(0)
             if "--show-all" in x or "A" in x:
                 x = "-A"
-                Vars.show_ends = "$"
+                Vars.show_ends = "$\n"
                 Vars.show_tabs = "^I"
                 Vars.arg_list += [x]
             if "--show-tabs" in x or "T" in x:
@@ -188,7 +192,7 @@ def get_args(Vars, File): #parse command line arguments
                 Vars.arg_list += [x]
             if "--show-ends" in x or "E" in x:
                 x = "-E"
-                Vars.show_ends = "$"
+                Vars.show_ends = "$\n"
                 Vars.arg_list += [x]
             if "--number-nonblank" in x or "b" in x:
                 x = "-b"
