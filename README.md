@@ -22,9 +22,6 @@ sudo ./install.sh
 ## dog - ([cat](https://github.com/coreutils/coreutils/blob/master/src/cat.c))
 concatenate files and print on the standard output
 
-* unsupported features
-* `-v, --show-nonprinting` (or related options)
-
 ## abolish - ([rm](https://github.com/coreutils/coreutils/blob/master/src/rm.c))
 file deletion utility
 
