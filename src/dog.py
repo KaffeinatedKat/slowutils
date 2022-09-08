@@ -11,11 +11,12 @@ class Variables:
     def __init__(self):
         self.program = sys.argv[0]
         self.args = sys.argv[1:]
-        self.options = ["-A", "--show-all", "-b", "--number-nonblank", "-E", "--show-ends", "-n", "--number", "-T", "--show-tabs", "-u", "-s", "--squeeze-blank", "--help", "--version"]
+        self.options = ["-A", "--show-all", "-b", "--number-nonblank", "-E", "--show-ends", "-n", "--number", "-T", "--show-tabs", "-u", "-s", "--squeeze-blank", "-v", "--help", "--version"]
         self.line_count = 1
         self.show_tabs = "\t"
-        self.show_ends = None
+        self.show_ends = ""
         self.surpress_empty = False
+        self.show_nonprinting = False
         self.args = []
         self.arg_list = []
         self.file_list = []
@@ -47,7 +48,6 @@ class Path:
     def __init__(self):
         self.last_line = ""
         self.current_line = ""
-        self.next_line = ""
         self.line_count = 1
         self.show_line_count = ""
         self.path = ""
@@ -60,7 +60,7 @@ class Path:
             self.show_line_count = ""
             self.line_count -= 1
         self.line_count += 1
-        
+       
 
     def line_history(self):
         self.last_line = self.current_line
@@ -68,22 +68,66 @@ class Path:
 
 
     def print_line(self, Vars): #print file line by line
-        with open(self.path) as f:
-            self.current_line = f.readline().replace("\t", Vars.show_tabs)
-            while self.current_line:
-                self.next_line = f.readline().replace("\t", Vars.show_tabs)   
-                self.current_line = self.current_line.rstrip("\n")
-                self.count_line(Vars)
-
-                if not Vars.surpress_empty: 
-                    print(f"{self.show_line_count}{self.current_line}", end=Vars.show_ends)
-                elif Vars.surpress_empty:
-                    if self.last_line == "" and self.current_line == "": # if current and last lines are empty, dont print current blank line
-                        self.line_count -= 1 # dont count surpressed lines
+        with open(self.path, mode="rb") as f: # show_nonprinting, this shit works as is, please never touch this unreadable mess again
+            self.current_line = bytearray()
+            self.last_line = bytearray()
+            self.count_line(Vars)
+            byte = f.read(1)                
+            while byte:
+                if byte == b'\n': # line has ended
+                    if not Vars.surpress_empty:
+                        print(f"{self.show_line_count}{self.current_line.decode()}")
                     else:
-                        print(f"{self.show_line_count}{self.current_line}", end=Vars.show_ends)
+                        if self.current_line == bytearray(b'') and self.last_line == bytearray(b''):
+                            self.line_count -= 1
+                        else:
+                            print(f"{self.show_line_count}{self.current_line.decode()}")
 
-                self.line_history()
+                    self.last_line = self.current_line
+                    self.current_line = bytearray()  
+                    
+                    #self.current_line += str.encode(f"{Vars.show_ends}\n{self.show_line_count}")
+                    self.count_line(Vars)
+               
+                if Vars.show_nonprinting:
+                    if byte == b'\x09':
+                        self.current_line += b'\t'
+                    elif b'\x00' <= byte <= b'\x08' or b'\x0a' <= byte <= b'\x1f':
+                        if byte != b'\x0a':
+                            self.current_line += str.encode('^') + (int.from_bytes(byte, "big") + 64).to_bytes(1, "big")
+                    elif b'\x20' <= byte <= b'\x7e':
+                        self.current_line += byte
+                    elif byte == b'\x7f':
+                        self.current_line += str.encode('^?')
+                    elif b'\x80' <= byte <= b'\x9f':
+                        self.current_line += str.encode('M-^') + (int.from_bytes(byte, "big") - 64).to_bytes(1, "big")
+                    elif b'\xa0' <= byte <= b'\xfe':
+                        self.current_line += str.encode('M-') + (int.from_bytes(byte, "big") - 128).to_bytes(1, "big")
+                    else:
+                        self.current_line += str.encode('M-^?')
+                else:
+                    if b'\x20' <= byte <= b'\x7e':
+                        self.current_line += byte
+
+                byte = f.read(1)
+
+        #else:
+            #with open(self.path, mode=self.mode) as f:
+                #self.current_line = f.readline().replace("\t", Vars.show_tabs)
+                #while self.current_line:
+                    #self.next_line = f.readline().replace("\t", Vars.show_tabs)  
+                    #self.current_line = self.current_line.rstrip("\n")
+                    #self.count_line(Vars)
+
+                    #if not Vars.surpress_empty:
+                    #    print(f"{self.show_line_count}{self.current_line}\r", end=Vars.show_ends)
+                    #elif Vars.surpress_empty:
+                        #if self.last_line == "" and self.current_line == "": # if current and last lines are empty, dont print current blank line
+                       #     self.line_count -= 1 # dont count surpressed lines
+                      #  else:
+                     #       print(f"{self.show_line_count}{self.current_line}\r", end=Vars.show_ends)
+
+                    #self.line_history()
 
 
 
@@ -93,13 +137,13 @@ def stdin(Vars, File): #standard input
         try:
             File.current_line = input()
             File.count_line(Vars)
-            if not Vars.surpress_empty: 
-                print(f"{File.show_line_count}{File.current_line}", end=Vars.show_ends)
+            if not Vars.surpress_empty:
+                print(f"{File.show_line_count}{File.current_line}\r", end=Vars.show_ends)
             elif Vars.surpress_empty:
                 if File.last_line == "" and File.current_line == "": # if current and last lines are empty, dont print current blank line
                     File.line_count -= 1 # dont count surpressed lines
                 else:
-                    print(f"{File.show_line_count}{File.current_line}", end=Vars.show_ends)
+                    print(f"{File.show_line_count}{File.current_line}\r", end=Vars.show_ends)
 
             File.line_history()
 
@@ -120,12 +164,12 @@ def get_args(Vars, File): #parse command line arguments
                     Vars.args += [f"-{z}"]
         else: #add everything else normally
             Vars.args.append(x)
-        
+       
     for x in Vars.args:
         if x.startswith("-") and not x.endswith("-"): #check for arguments (ex. -b)
             if x not in Vars.options: #exit with invalid options
                 print("{0}: invalid option -- '{1}'\nTry '{2}' --help' for more information.".format(Vars.program, x.replace("-", ""), Vars.program))
-                exit(1)   
+                exit(1)  
 
             if "--help" in x:
                 print(Vars.help_message)
@@ -135,7 +179,7 @@ def get_args(Vars, File): #parse command line arguments
                 exit(0)
             if "--show-all" in x or "A" in x:
                 x = "-A"
-                Vars.show_ends = "$\n"
+                Vars.show_ends = "$"
                 Vars.show_tabs = "^I"
                 Vars.arg_list += [x]
             if "--show-tabs" in x or "T" in x:
@@ -144,7 +188,7 @@ def get_args(Vars, File): #parse command line arguments
                 Vars.arg_list += [x]
             if "--show-ends" in x or "E" in x:
                 x = "-E"
-                Vars.show_ends = "$\n"
+                Vars.show_ends = "$"
                 Vars.arg_list += [x]
             if "--number-nonblank" in x or "b" in x:
                 x = "-b"
@@ -154,6 +198,8 @@ def get_args(Vars, File): #parse command line arguments
                 Vars.arg_list += [x]
             if "s" in x:
                 Vars.surpress_empty = True
+            if "v" in x:
+                Vars.show_nonprinting = True
         else: #everything else goes to into print_line()
             Vars.file_list.append(x)
 
