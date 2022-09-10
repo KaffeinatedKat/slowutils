@@ -1,4 +1,4 @@
-# pyutils
+# python-coreutils
 A few of the coreutils written in python becuase why not
 
 Below is the list of programs I have rewritten thus far, and how they differ from the original (they are all slower)
@@ -10,8 +10,8 @@ Below is the list of programs I have rewritten thus far, and how they differ fro
 ## Install
 
 ```
-git clone https://github.com/KaffeinatedKat/pyutils
-cd pyutils
+git clone https://github.com/KaffeinatedKat/python-coreutils
+cd python-coreutils
 sudo ./install.sh
 ```
 

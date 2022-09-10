@@ -51,6 +51,7 @@ class Path:
     def __init__(self):
         self.last_line = ""
         self.current_line = ""
+        self.next_line = "" # for stdin
         self.line_count = 1
         self.show_line_count = ""
         self.path = ""
