@@ -77,7 +77,7 @@ class Path:
 
     def abolish(self, Vars, Error):
         self.get_type()
-    
+
         if not Vars.annoy:
             self.delete(Vars, Error)
             return
@@ -152,7 +152,7 @@ class Path:
 
 
         if Vars.verbose and Vars.success: # print verbose message if file deletion successful
-           print(f"{Vars.verbose_message} '{self.path}'")
+            print(f"{Vars.verbose_message} '{self.path}'")
 
 
 
@@ -208,7 +208,7 @@ def main():
     Error = Exceptions()
     File = Path()
     get_args(Vars, File, Error)
-    
+
     if len(sys.argv[1:]) == 0: #exit with no input
         Error.MissingOperand()
         exit(1)
@@ -220,7 +220,7 @@ def main():
         if not stdin(f"{Vars.program}: abolish {File.file_count} arguments? ").lower().startswith("y"):
             exit(1)
 
-    for x in Vars.files: #parse files/folders to delete
+    for x in Vars.files: # parse files/folders to delete
         Vars.success = False
         File.path = os.path.join(x)
         File.abolish(Vars, Error)
