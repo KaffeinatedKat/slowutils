@@ -1,0 +1,130 @@
+#!/usr/bin/python3
+
+# smack - change modification and access times of files
+
+import os
+import sys
+import time
+import datetime
+
+
+class Path:
+    def __init__(self):
+        self.stamp_formats = ["%y%m%d%H%M", "%Y%m%d%H%M", "%Y%m%d%H%M.%S", "%y%m%d%H%M.%S"]
+        self.stats = None
+        self.mtime = 0
+        self.atime = 0
+        self.path = ""
+
+    def update_file_times(self, Vars, Error):
+        if Vars.access_only:
+            self.mtime = int(os.stat(self.path).st_mtime)
+            self.atime = Vars.date
+        elif Vars.modify_only:
+            self.atime = int(os.stat(self.path).st_atime)
+            self.mtime = Vars.date
+        else:
+            self.atime = Vars.date
+            self.mtime = Vars.date
+
+        if os.path.exists(self.path):
+            os.utime(self.path, (self.atime, self.mtime))
+
+
+
+    def get_time_stamp(self, Vars, Error, time):
+        valid_time = False
+        for x in self.stamp_formats:
+            try:
+                Vars.date = datetime.datetime.strptime(time, x)
+                valid_time = Vars.date.strftime(x) == time # converts date object back to string and compares it to the input date (requires date have padded zeros, hours and minutes)
+                if valid_time: 
+                    break
+            except ValueError:
+                None
+
+        if Vars.date == None or not valid_time:
+            Error.invalid_date_format(time)
+
+
+
+
+
+class Variables:
+    def __init__(self):
+        self.program = sys.argv[0]
+        self.create_new = True
+        self.modify_only = False
+        self.access_only = False
+        self.date = None
+        self.file_list = []
+        self.args = []
+
+    def get_args(self, Vars, File, Error):
+        index_ignore = []
+        for x in sys.argv[1:]:
+            if x.startswith("--"):
+                self.args.append(x)
+            elif x.startswith("-") and not x.endswith("-"):
+                for z in list(x):
+                    if z != "-":
+                        self.args += [f"-{z}"]
+            else:
+                self.args.append(x)
+
+        for index, x in enumerate(self.args):
+            if x.startswith("-") and not x.endswith("-"):
+                if "-t" in x:
+                    try:
+                        File.get_time_stamp(self, Error, self.args[index + 1])
+                        index_ignore += [index + 1]
+                    except IndexError:
+                        Error.no_argument(x.replace("-", ""))
+
+                if "-m" in x:
+                    Vars.modify_only = True
+
+                if "-a" in x:
+                    Vars.access_only = True
+
+                if "-c" in x:
+                    Vars.create_new = False
+            else:
+                if index not in index_ignore: # dont parse option arguments as files
+                    self.file_list.append(x)
+
+
+
+
+
+class Exceptions(Variables):
+    def invalid_date_format(self, date):
+        print(f"{self.program}: invalid date format '{date}'")
+    
+    def no_argument(self, option):
+        print(f"{self.program}: option requires an argument -- '{option}'\nTry '{self.program} --help' for more information.")
+
+
+
+
+
+def main():
+    Vars = Variables()
+    File = Path()
+    Error = Exceptions()
+    
+    Vars.date = datetime.datetime.now()
+    Vars.get_args(Vars, File, Error)
+    Vars.date = time.mktime(Vars.date.timetuple())
+
+    for x in Vars.file_list:
+        File.path = os.path.join(x)
+        
+        if not os.path.exists(File.path) and Vars.create_new:
+            open(File.path, "x").close()
+        
+        File.update_file_times(Vars, Error)
+
+        
+if __name__ == "__main__":
+    main()
