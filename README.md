@@ -12,10 +12,8 @@ Below is the list of programs I have rewritten thus far, and how they differ fro
 ```
 git clone https://github.com/KaffeinatedKat/python-coreutils
 cd python-coreutils
-sudo ./install.sh
+pip3 install --user .
 ```
-
-* requires root privilege to write to /usr/local/bin
 
 # Programs
 
@@ -25,7 +23,7 @@ concatenate files and print on the standard output
 ## abolish - ([rm](https://github.com/coreutils/coreutils/blob/master/src/rm.c))
 file deletion utility
 
-* unsupported features
+* yet to be implimented
 * `--interactive prompt according to WHEN: never, once (-I), or always (-i); without WHEN, prompt always`
 * `--one-file-system when removing a hierarchy recursively, skip any directory that is on a file system different from that of the corresponding command line argument`
 * `--no-preserve-root do not treat '/' specially`
