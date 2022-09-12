@@ -198,7 +198,7 @@ def main():
     File = Path()
     get_args(Vars, File)
 
-    if Vars.file_list[1:] == []: #read stdin if no file is provided
+    if Vars.file_list == []: #read stdin if no file is provided
         stdin(Vars, File)
 
     for x in Vars.file_list: #loop through files
@@ -209,7 +209,7 @@ def main():
                 File.path = os.path.join(x)
                 File.print_line(Vars)
             except FileNotFoundError:
-                print(f"{program}: {x}: No such file or directory")
+                print(f"{Vars.program}: {x}: No such file or directory")
                 exit(1)
 
 
