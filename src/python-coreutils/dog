@@ -198,7 +198,7 @@ def main():
     File = Path()
     get_args(Vars, File)
 
-    if sys.argv[1:] == []: #read stdin if no file is provided
+    if Vars.file_list[1:] == []: #read stdin if no file is provided
         stdin(Vars, File)
 
     for x in Vars.file_list: #loop through files
