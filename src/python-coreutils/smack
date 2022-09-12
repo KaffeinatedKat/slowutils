@@ -16,7 +16,7 @@ class Path:
         self.atime = 0
         self.path = ""
 
-    def update_file_times(self, Vars, Error):
+    def get_file_times(self, Vars, Error):
         if Vars.access_only:
             self.mtime = int(os.stat(self.path).st_mtime)
             self.atime = Vars.date
@@ -27,23 +27,19 @@ class Path:
             self.atime = Vars.date
             self.mtime = Vars.date
 
-        if os.path.exists(self.path):
-            os.utime(self.path, (self.atime, self.mtime))
-
-
 
     def get_time_stamp(self, Vars, Error, time):
         valid_time = False
         for x in self.stamp_formats:
             try:
                 Vars.date = datetime.datetime.strptime(time, x)
-                valid_time = Vars.date.strftime(x) == time # converts date object back to string and compares it to the input date (requires date have padded zeros, hours and minutes)
-                if valid_time: 
+                valid_time = Vars.date.strftime(x) == time #  converts date object back to string and compares it to the input date (requires date have padded zeros, hours and minutes)
+                if valid_time:
                     break
             except ValueError:
                 None
 
-        if Vars.date == None or not valid_time:
+        if Vars.date is None or not valid_time:
             Error.invalid_date_format(time)
 
 
@@ -57,6 +53,7 @@ class Variables:
         self.modify_only = False
         self.access_only = False
         self.date = None
+        self.symlinks = True
         self.file_list = []
         self.args = []
 
@@ -80,6 +77,17 @@ class Variables:
                         index_ignore += [index + 1]
                     except IndexError:
                         Error.no_argument(x.replace("-", ""))
+                
+                if "-r" in x:
+                    try:
+                        file = os.path.join(self.args[index + 1])
+                        File.atime = os.stat(file).st_atime
+                        File.mtime = os.stat(file).st_mtime
+                        index_ignore += [index + 1]
+                    except IndexError:
+                        Error.no_argument(x.replace("-", ""))
+                    except FileNotFoundError:
+                        Error.attrib(file)
 
                 if "-m" in x:
                     Vars.modify_only = True
@@ -89,8 +97,11 @@ class Variables:
 
                 if "-c" in x:
                     Vars.create_new = False
+
+                if "-h" in x:
+                    Vars.symlinks = False
             else:
-                if index not in index_ignore: # dont parse option arguments as files
+                if index not in index_ignore: #  dont parse option arguments as files
                     self.file_list.append(x)
 
 
@@ -100,11 +111,15 @@ class Variables:
 class Exceptions(Variables):
     def invalid_date_format(self, date):
         print(f"{self.program}: invalid date format '{date}'")
-    
+
     def no_argument(self, option):
         print(f"{self.program}: option requires an argument -- '{option}'\nTry '{self.program} --help' for more information.")
 
+    def attrib(self, file):
+        print(f"{self.program}: failed to get attributes of '{file}': No such file or directory")
 
+    def missing_operand(self):
+        print(f"{self.program}: missing file operand\nTry '{self.program} -- help' for more information.")
 
 
 
@@ -117,13 +132,21 @@ def main():
     Vars.get_args(Vars, File, Error)
     Vars.date = time.mktime(Vars.date.timetuple())
 
+    if Vars.file_list == []:
+        Error.missing_operand()
+
     for x in Vars.file_list:
         File.path = os.path.join(x)
         
         if not os.path.exists(File.path) and Vars.create_new:
             open(File.path, "x").close()
         
-        File.update_file_times(Vars, Error)
+        if File.atime == 0 and File.mtime == 0: #  update a and m time if they have not been set
+            File.get_file_times(Vars, Error)
+        
+        if os.path.exists(File.path):
+            os.utime(File.path, (File.atime, File.mtime), follow_symlinks=Vars.symlinks)
+
 
         
 if __name__ == "__main__":
