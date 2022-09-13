@@ -17,7 +17,6 @@ class Path:
         self.path = ""
 
     def update_file_times(self, Vars, Error):
-        Vars.new_time = time.mktime(Vars.new_time.timetuple())
         self.atime = Vars.new_time
         self.mtime = Vars.new_time
 
@@ -138,8 +137,10 @@ def main():
     if Vars.file_list == []:
         Error.missing_operand()
 
+    Vars.new_time = time.mktime(Vars.new_time.timetuple())
     for x in Vars.file_list:
         File.path = os.path.join(x)
+        File.new_time = datetime.datetime.now()
         
         if not os.path.exists(File.path) and Vars.create_new:
             open(File.path, "x").close()
