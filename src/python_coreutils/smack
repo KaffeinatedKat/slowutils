@@ -55,6 +55,7 @@ class Variables:
     def __init__(self):
         self.program = sys.argv[0]
         self.new_time = datetime.datetime.now()
+        self.valid_args = ["-a", "-m", "-h", "-t", "-c", "-r"]
         self.create_new = True
         self.modify_only = False
         self.access_only = False
@@ -77,6 +78,11 @@ class Variables:
 
         for index, x in enumerate(self.args):
             if x.startswith("-") and not x.endswith("-"):
+                if x not in self.valid_args:
+                    if not x.startswith("--"):
+                        x = x.replace("-", "")
+                    Error.invalid_argument(x)
+                    exit(1)
                 if "-t" in x:
                     try:
                         File.get_time_stamp(self, Error, self.args[index + 1])
@@ -125,7 +131,8 @@ class Exceptions(Variables):
     def missing_operand(self):
         print(f"{self.program}: missing file operand\nTry '{self.program} -- help' for more information.")
 
-
+    def invalid_argument(self, argument):
+        print(f"{self.program}: invalid option -- '{argument}'\nTry '{self.program} --help' for more information.")
 
 def main():
     Vars = Variables()
