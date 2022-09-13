@@ -16,30 +16,36 @@ class Path:
         self.atime = 0
         self.path = ""
 
-    def get_file_times(self, Vars, Error):
-        if Vars.access_only:
-            self.mtime = int(os.stat(self.path).st_mtime)
-            self.atime = Vars.date
-        elif Vars.modify_only:
-            self.atime = int(os.stat(self.path).st_atime)
-            self.mtime = Vars.date
-        else:
-            self.atime = Vars.date
-            self.mtime = Vars.date
+    def update_file_times(self, Vars, Error):
+        Vars.new_time = time.mktime(Vars.new_time.timetuple())
+        self.atime = Vars.new_time
+        self.mtime = Vars.new_time
 
+        if Vars.ref_file != "":
+            self.atime = os.stat(Vars.ref_file).st_atime
+            self.mtime = os.stat(Vars.ref_file).st_mtime
+        
+        if not Vars.modify_only and Vars.access_only: #  skip if -am so both times are modified
+            if Vars.modify_only:
+                self.atime = os.stat(self.path).st_atime
+            elif Vars.access_only:
+                self.mtime = os.stat(self.path).st_mtime
+
+        if os.path.exists(self.path):
+            os.utime(self.path, (self.atime, self.mtime), follow_symlinks=Vars.symlinks)
 
     def get_time_stamp(self, Vars, Error, time):
-        valid_time = False
         for x in self.stamp_formats:
+            valid_time = False
             try:
-                Vars.date = datetime.datetime.strptime(time, x)
-                valid_time = Vars.date.strftime(x) == time #  converts date object back to string and compares it to the input date (requires date have padded zeros, hours and minutes)
+                Vars.new_time = datetime.datetime.strptime(time, x)
+                valid_time = Vars.new_time.strftime(x) == time #  converts date object back to string and compares it to the input date (requires date have padded zeros, hours and minutes)
                 if valid_time:
                     break
             except ValueError:
-                None
+                Vars.new_time = None
 
-        if Vars.date is None or not valid_time:
+        if Vars.new_time is None or not valid_time:
             Error.invalid_date_format(time)
 
 
@@ -49,11 +55,12 @@ class Path:
 class Variables:
     def __init__(self):
         self.program = sys.argv[0]
+        self.new_time = datetime.datetime.now()
         self.create_new = True
         self.modify_only = False
         self.access_only = False
-        self.date = None
         self.symlinks = True
+        self.ref_file = ""
         self.file_list = []
         self.args = []
 
@@ -80,9 +87,7 @@ class Variables:
                 
                 if "-r" in x:
                     try:
-                        file = os.path.join(self.args[index + 1])
-                        File.atime = os.stat(file).st_atime
-                        File.mtime = os.stat(file).st_mtime
+                        Vars.ref_file = os.path.join(self.args[index + 1])
                         index_ignore += [index + 1]
                     except IndexError:
                         Error.no_argument(x.replace("-", ""))
@@ -128,9 +133,7 @@ def main():
     File = Path()
     Error = Exceptions()
     
-    Vars.date = datetime.datetime.now()
     Vars.get_args(Vars, File, Error)
-    Vars.date = time.mktime(Vars.date.timetuple())
 
     if Vars.file_list == []:
         Error.missing_operand()
@@ -141,13 +144,9 @@ def main():
         if not os.path.exists(File.path) and Vars.create_new:
             open(File.path, "x").close()
         
-        if File.atime == 0 and File.mtime == 0: #  update a and m time if they have not been set
-            File.get_file_times(Vars, Error)
-        
-        if os.path.exists(File.path):
-            os.utime(File.path, (File.atime, File.mtime), follow_symlinks=Vars.symlinks)
+        File.update_file_times(Vars, Error)
 
 
-        
+
 if __name__ == "__main__":
     main()
