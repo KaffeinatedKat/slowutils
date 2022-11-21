@@ -17,34 +17,33 @@ class Path:
         self.path = ""
 
     def update_file_times(self, Vars, Error):
-        self.atime = Vars.new_time
-        self.mtime = Vars.new_time
-
-        if Vars.ref_file != "":
-            self.atime = os.stat(Vars.ref_file).st_atime
-            self.mtime = os.stat(Vars.ref_file).st_mtime
-        
-        if not Vars.modify_only and Vars.access_only: #  skip if -am so both times are modified
-            if Vars.modify_only:
-                self.atime = os.stat(self.path).st_atime
-            elif Vars.access_only:
-                self.mtime = os.stat(self.path).st_mtime
+        if Vars.access_only:
+            self.mtime = int(os.stat(self.path).st_mtime)
+            self.atime = Vars.date
+        elif Vars.modify_only:
+            self.atime = int(os.stat(self.path).st_atime)
+            self.mtime = Vars.date
+        else:
+            self.atime = Vars.date
+            self.mtime = Vars.date
 
         if os.path.exists(self.path):
-            os.utime(self.path, (self.atime, self.mtime), follow_symlinks=Vars.symlinks)
+            os.utime(self.path, (self.atime, self.mtime))
+
+
 
     def get_time_stamp(self, Vars, Error, time):
+        valid_time = False
         for x in self.stamp_formats:
-            valid_time = False
             try:
-                Vars.new_time = datetime.datetime.strptime(time, x)
-                valid_time = Vars.new_time.strftime(x) == time #  converts date object back to string and compares it to the input date (requires date have padded zeros, hours and minutes)
-                if valid_time:
+                Vars.date = datetime.datetime.strptime(time, x)
+                valid_time = Vars.date.strftime(x) == time # converts date object back to string and compares it to the input date (requires date have padded zeros, hours and minutes)
+                if valid_time: 
                     break
             except ValueError:
-                Vars.new_time = None
+                None
 
-        if Vars.new_time is None or not valid_time:
+        if Vars.date == None or not valid_time:
             Error.invalid_date_format(time)
 
 
@@ -54,13 +53,10 @@ class Path:
 class Variables:
     def __init__(self):
         self.program = sys.argv[0]
-        self.new_time = datetime.datetime.now()
-        self.valid_args = ["-a", "-m", "-h", "-t", "-c", "-r"]
         self.create_new = True
         self.modify_only = False
         self.access_only = False
-        self.symlinks = True
-        self.ref_file = ""
+        self.date = None
         self.file_list = []
         self.args = []
 
@@ -78,26 +74,12 @@ class Variables:
 
         for index, x in enumerate(self.args):
             if x.startswith("-") and not x.endswith("-"):
-                if x not in self.valid_args:
-                    if not x.startswith("--"):
-                        x = x.replace("-", "")
-                    Error.invalid_argument(x)
-                    exit(1)
                 if "-t" in x:
                     try:
                         File.get_time_stamp(self, Error, self.args[index + 1])
                         index_ignore += [index + 1]
                     except IndexError:
                         Error.no_argument(x.replace("-", ""))
-                
-                if "-r" in x:
-                    try:
-                        Vars.ref_file = os.path.join(self.args[index + 1])
-                        index_ignore += [index + 1]
-                    except IndexError:
-                        Error.no_argument(x.replace("-", ""))
-                    except FileNotFoundError:
-                        Error.attrib(file)
 
                 if "-m" in x:
                     Vars.modify_only = True
@@ -107,11 +89,8 @@ class Variables:
 
                 if "-c" in x:
                     Vars.create_new = False
-
-                if "-h" in x:
-                    Vars.symlinks = False
             else:
-                if index not in index_ignore: #  dont parse option arguments as files
+                if index not in index_ignore: # dont parse option arguments as files
                     self.file_list.append(x)
 
 
@@ -121,40 +100,31 @@ class Variables:
 class Exceptions(Variables):
     def invalid_date_format(self, date):
         print(f"{self.program}: invalid date format '{date}'")
-
+    
     def no_argument(self, option):
         print(f"{self.program}: option requires an argument -- '{option}'\nTry '{self.program} --help' for more information.")
 
-    def attrib(self, file):
-        print(f"{self.program}: failed to get attributes of '{file}': No such file or directory")
 
-    def missing_operand(self):
-        print(f"{self.program}: missing file operand\nTry '{self.program} -- help' for more information.")
 
-    def invalid_argument(self, argument):
-        print(f"{self.program}: invalid option -- '{argument}'\nTry '{self.program} --help' for more information.")
+
 
 def main():
     Vars = Variables()
     File = Path()
     Error = Exceptions()
     
+    Vars.date = datetime.datetime.now()
     Vars.get_args(Vars, File, Error)
+    Vars.date = time.mktime(Vars.date.timetuple())
 
-    if Vars.file_list == []:
-        Error.missing_operand()
-
-    Vars.new_time = time.mktime(Vars.new_time.timetuple())
     for x in Vars.file_list:
         File.path = os.path.join(x)
-        File.new_time = datetime.datetime.now()
         
         if not os.path.exists(File.path) and Vars.create_new:
             open(File.path, "x").close()
         
         File.update_file_times(Vars, Error)
 
-
-
+        
 if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
-# python-coreutils
+# slowutils
 A few of the coreutils written in python becuase why not
 
 Below is the list of programs I have rewritten thus far, and how they differ from the original (they are all slower)
@@ -10,8 +10,8 @@ Below is the list of programs I have rewritten thus far, and how they differ fro
 ## Install
 
 ```
-git clone https://github.com/KaffeinatedKat/python-coreutils
-cd python-coreutils
+git clone https://github.com/KaffeinatedKat/slowutils
+cd slowutils
 pip3 install --user .
 ```
 
@@ -28,17 +28,6 @@ file deletion utility
 * `--one-file-system when removing a hierarchy recursively, skip any directory that is on a file system different from that of the corresponding command line argument`
 * `--no-preserve-root do not treat '/' specially`
 * `--preserve-root[all] do not remove '/'`
-
-
-## smack - ([touch](https://github.com/coreutils/coreutils/blob/master/src/touch.c))
-change modification and access time of files
-
-* yet to be implimented
-* `long options`
-* `-d, --date=STRING      parse STRING and use it instead of current time`
-* `--time=WORD        change the specified time:
-                           WORD is access, atime, or use: equivalent to -a
-                           WORD is modify or mtime: equivalent to -m`
 
 ## yeah - ([yes](https://github.com/coreutils/coreutils/blob/master/src/yes.c))
 output a string repeatedly until killed

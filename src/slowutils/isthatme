@@ -18,7 +18,7 @@ Written by John Crawford"""
 
 def get_args(): #parse arguments
     for x in sys.argv:
-        match x:
+        matcx:
             case "--help":
                 print(help_message)
                 exit(0)

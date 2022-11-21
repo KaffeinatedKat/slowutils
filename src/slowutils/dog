@@ -113,9 +113,11 @@ class Path:
                     self.count_line(Vars)
                 byte = f.read(1)
 
-            if Vars.show_nonprinting:
-                print(f"{self.show_line_count}{self.current_line.decode()}", end="")
 
+            if Vars.show_nonprinting:
+                print(f"{self.show_line_count}{self.current_line.decode()}", end="")    
+
+            
 
 
 def stdin(Vars, File): #standard input
@@ -145,7 +147,7 @@ def get_args(Vars, File): #parse command line arguments
     for x in sys.argv[1:]:
         if x.startswith("--"): #add arguments such as --show-tabs into array as ['--show-tabs']
             Vars.args.append(x)
-        elif x.startswith("-") and not x.endswith("-"): #add arguments such as -bET into array as ['-b', '-E', '-T']
+        elif x.startswith("-"): #add arguments such as -bET into array as ['-b', '-E', '-T']
             for z in list(x):
                 if z != "-":
                     Vars.args += [f"-{z}"]
