@@ -29,6 +29,16 @@ file deletion utility
 * `--no-preserve-root do not treat '/' specially`
 * `--preserve-root[all] do not remove '/'`
 
+## smack - ([touch](https://github.com/coreutils/coreutils/blob/master/src/touch.c))
+change modification and access time of files
+
+* yet to be implimented
+* `long options`
+* `-d, --date=STRING      parse STRING and use it instead of current time`
+* `--time=WORD        change the specified time:
+                           WORD is access, atime, or use: equivalent to -a
+                           WORD is modify or mtime: equivalent to -m`
+
 ## yeah - ([yes](https://github.com/coreutils/coreutils/blob/master/src/yes.c))
 output a string repeatedly until killed
 
