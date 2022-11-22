@@ -3,8 +3,9 @@
 # yeah - output a string repeatedly until killed
 
 import sys
+import os
 
-file = sys.argv[0]
+file = os.path.basename(sys.argv[0])
 help_message = f"""Usage: {file} [STRING]...
   or:  {file} OPTION
 Repeatedly output a line with all specified STRING(s), or 'y'.

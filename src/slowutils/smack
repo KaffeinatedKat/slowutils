@@ -58,7 +58,7 @@ class Path:
 
 class Variables:
     def __init__(self):
-        self.program = sys.argv[0]
+        self.program = os.path.basename(sys.argv[0])
         self.new_time = datetime.datetime.now()
         self.valid_args = ["-a", "-m", "-h", "-t", "-c", "-r"]
         self.create_new = True

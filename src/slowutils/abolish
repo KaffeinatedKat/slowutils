@@ -7,7 +7,7 @@ import os
 
 
 class Variables:
-    program = os.path.realpath(__file__)
+    program = os.path.basename(sys.argv[0])
     files = []
     args = []
     recursive = False

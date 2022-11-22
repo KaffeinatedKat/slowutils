@@ -6,7 +6,7 @@ import os
 import pwd
 import sys
 
-program = sys.argv[0]
+program = os.path.basename(sys.argv[0])
 help_message = f"""Usage: {program} [OPTION]...
 Print the user name associated with the current effective user ID.
 Same as id -un.
