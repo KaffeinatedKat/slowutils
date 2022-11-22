@@ -21,8 +21,11 @@ class Path:
         self.mtime = Vars.new_time
 
         if Vars.ref_file != "":
-            self.atime = os.stat(Vars.ref_file).st_atime
-            self.mtime = os.stat(Vars.ref_file).st_mtime
+            if not os.path.exists(Vars.ref_file):
+                Error.attrib(Vars.ref_file)
+            else:
+                self.atime = os.stat(Vars.ref_file).st_atime
+                self.mtime = os.stat(Vars.ref_file).st_mtime
 
         if not Vars.modify_only and Vars.access_only: #  skip if -am so both times are modified
             if Vars.modify_only:
@@ -98,8 +101,6 @@ class Variables:
                         index_ignore += [index + 1]
                     except IndexError:
                         Error.no_argument(x.replace("-", ""))
-                    except FileNotFoundError:
-                        Error.attrib(file)
 
                 if "-m" in x:
                     Vars.modify_only = True
@@ -123,18 +124,23 @@ class Variables:
 class Exceptions(Variables):
     def invalid_date_format(self, date):
         print(f"{self.program}: invalid date format '{date}'")
+        exit(1)
     
     def no_argument(self, option):
         print(f"{self.program}: option requires an argument -- '{option}'\nTry '{self.program} --help' for more information.")
+        exit(1)
 
     def attrib(self, file):
         print(f"{self.program}: failed to get attributes of '{file}': No such file or directory")
+        exit(1)
 
     def missing_operand(self):
         print(f"{self.program}: missing file operand\nTry '{self.program} -- help' for more information.")
+        exit(1)
 
     def invalid_argument(self, argument):
         print(f"{self.program}: invalid option -- '{argument}'\nTry '{self.program} --help' for more information.")
+        exit(1)
 
 
 
