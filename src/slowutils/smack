@@ -87,7 +87,7 @@ class Variables:
                     if not x.startswith("--"):
                         x = x.replace("-", "")
                     Error.invalid_argument(x)
-                    exit(1)
+                
                 if "-t" in x:
                     try:
                         File.get_time_stamp(self, Error, self.args[index + 1])
@@ -101,6 +101,9 @@ class Variables:
                         index_ignore += [index + 1]
                     except IndexError:
                         Error.no_argument(x.replace("-", ""))
+                    
+                    if not os.path.exists(self.args[index + 1]):
+                        Error.attrib(self.args[index + 1])
 
                 if "-m" in x:
                     Vars.modify_only = True
