@@ -12,6 +12,8 @@ class Variables:
     args = []
     recursive = False
     force = False
+    ignore = False
+    splitVars = True
     empty_folder = False
     verbose = False
     success = False
@@ -34,8 +36,11 @@ Remove (unlink) the FILE(s).\n
 By default, abolish does not abolish directories.  Use the --recursive (-r or -R)
 option to abolish each listed directory, too, along with all of its contents.\n
 To abolish a file whose name starts with a '-', for example '-foo',
-use this command:
-  {program} ./-foo\n
+use one of these commands:
+  {program} -- -foo
+
+  {program} ./-foo
+
 Note that if you use abolish to abolish a file, it might be possible to recover
 some of its contents, given sufficient expertise and/or time.  For greater
 assurance that the contents are truly unrecoverable, consider using shred(1)."""
@@ -166,17 +171,26 @@ def stdin(text):
 
 def get_args(Vars, File, Error):
     for x in sys.argv[1:]:
-        if x.startswith("--"): # add long options as one entry
+        if x.startswith("-") and x.endswith("-"): # add "--", no longer split vars as they wont be detected as vars after this point
+            Vars.args.append("--")
+            Vars.splitVars = False
+        elif x.startswith("--"): # add long options as one entry
             Vars.args.append(x)
         elif x.startswith("-"): # add combined short options indivdually
-            for z in list(x):
-                if z != "-": # prevent ["--"] from being added
-                    Vars.args += [f"-{z}"]
+            if Vars.splitVars == True:
+                for z in list(x):
+                    if z != "-": # prevent "-" being added, causes "--" to appear in the arglist
+                        Vars.args += [f"-{z}"]
+            else: # unless "--" was specified, add it all as one option instead of splitting
+                Vars.args += [x]
         else: # add everything else normally
             Vars.args.append(x)
 
+
     for x in Vars.args:
-        if x.startswith("-"):
+        if x.startswith("-") and Vars.ignore == False:
+            if x == "--":
+                Vars.ignore = True
             if "--help" in x:
                 print(Vars.help_message)
                 exit(0)
