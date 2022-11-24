@@ -179,8 +179,8 @@ def stdin(text):
 
 def get_args(Vars, File, Error):
     for x in sys.argv[1:]:
-        if x.startswith("-") and x.endswith("-"): # add "--", no longer split vars as they wont be detected as vars after this point
-            Vars.args.append("--")
+        if x == "--": # add "--", no longer split vars as they wont be detected as vars after this point
+            Vars.args.append(x)
             Vars.splitVars = False
         elif x.startswith("--"): # add long options as one entry
             Vars.args.append(x)
