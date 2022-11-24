@@ -62,6 +62,9 @@ class Exceptions(Variables):
     def FolderNotEmpty(self, File):
         print(f"{self.program}: cannot abolish '{File.path}': Directory not empty")
 
+    def RefusingToRemove(self, File):
+        print(f"{self.program}: refusing to remove '.' or '..' directory: skipping '{File.path}'")
+
 
 
 class Path:
@@ -83,16 +86,21 @@ class Path:
     def abolish(self, Vars, Error):
         self.get_type()
 
-        if not Vars.annoy:
-            self.delete(Vars, Error)
-            return
+        if Vars.recursive and self.path == "." or self.path == "..":
+            Error.RefusingToRemove(self)
 
-        if self.is_symlink:
+        elif not Vars.annoy:
+            self.delete(Vars, Error)
+
+        elif self.is_symlink:
             if stdin(f"{Vars.program}: abolish symbolic link '{self.path}'? "):
                 self.delete(Vars, Error)
 
         elif self.is_folder:
+            print(self.path)
+            exit(1)
             if not Vars.recursive:
+                print("sdf")
                 Error.IsAFolder(self)
             elif len(os.listdir(self.path)) == 0: # if folder is empty
                 if Vars.delete_empty or Vars.recursive:
