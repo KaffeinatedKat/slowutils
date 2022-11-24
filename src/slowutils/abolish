@@ -65,6 +65,8 @@ class Exceptions(Variables):
     def RefusingToRemove(self, File):
         print(f"{self.program}: refusing to remove '.' or '..' directory: skipping '{File.path}'")
 
+    def InvalidArgument(self, arg):
+        print(f"{self.program}: invalid option -- '{arg}'")
 
 
 class Path:
@@ -199,22 +201,24 @@ def get_args(Vars, File, Error):
         if x.startswith("-") and Vars.ignore == False:
             if x == "--":
                 Vars.ignore = True
-            if "--help" in x:
+            elif "--help" in x:
                 print(Vars.help_message)
                 exit(0)
-            if "-r" in x.lower() or "--recursive" in x: #recursive '-r'
+            elif "-r" in x.lower() or "--recursive" in x: #recursive '-r'
                 Vars.recursive = True
                 Vars.delete_empty = True
-            if "-f" in x.lower() or "--force" in x:
+            elif "-f" in x.lower() or "--force" in x:
                 Vars.force = True
-            if "-d" in x.lower() or "--dir" in x:
+            elif "-d" in x.lower() or "--dir" in x:
                 Vars.delete_empty = True
-            if "-v" in x.lower() or "--verbose" in x:
+            elif "-v" in x.lower() or "--verbose" in x:
                 Vars.verbose = True
-            if "-i" in x:
+            elif "-i" in x:
                 Vars.annoy = True
-            if "-I" in x:
+            elif "-I" in x:
                 Vars.less_annoy = True
+            else:
+                Error.InvalidArgument(x.replace("-", ""))
         else:
             x = os.path.join(x)
             if not os.path.isdir(x) or os.path.islink(x):
