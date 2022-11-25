@@ -99,10 +99,7 @@ class Path:
                 self.delete(Vars, Error)
 
         elif self.is_folder:
-            print(self.path)
-            exit(1)
             if not Vars.recursive:
-                print("sdf")
                 Error.IsAFolder(self)
             elif len(os.listdir(self.path)) == 0: # if folder is empty
                 if Vars.delete_empty or Vars.recursive:
