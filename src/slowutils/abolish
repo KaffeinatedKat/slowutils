@@ -63,10 +63,13 @@ class Exceptions(Variables):
         print(f"{self.program}: cannot abolish '{File.path}': Directory not empty")
 
     def RefusingToRemove(self, File):
-        print(f"{self.program}: refusing to remove '.' or '..' directory: skipping '{File.path}'")
+        print(f"{self.program}: refusing to abolish '.' or '..' directory: skipping '{File.path}'")
 
     def InvalidArgument(self, arg):
         print(f"{self.program}: invalid option -- '{arg}'")
+
+    def PermissionDenied(self, File):
+        print(f"{self.program}: cannot abolish '{File.path}': Permission denied")
 
 
 class Path:
@@ -144,6 +147,9 @@ class Path:
             except FileNotFoundError:
                 if not Vars.force:
                     Error.FileNotFound(self)
+            except PermissionError:
+                Error.PermissionDenied(self)
+                exit(1)
 
         elif self.is_folder: # directories
             Vars.verbose_message = "abolished directory"
