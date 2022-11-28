@@ -60,7 +60,9 @@ class Variables:
     def __init__(self):
         self.program = os.path.basename(sys.argv[0])
         self.new_time = datetime.datetime.now()
-        self.valid_args = ["-a", "-m", "-h", "-t", "-c", "-r"]
+        self.valid_args = ["-a", "-m", "-h", "-t", "-c", "-r", "--time"]
+        self.access_words = ["atime", "access", "use"]
+        self.modify_words = ["mtime", "modify"]
         self.create_new = True
         self.modify_only = False
         self.access_only = False
@@ -83,19 +85,26 @@ class Variables:
 
         for index, x in enumerate(self.args):
             if x.startswith("-") and not x.endswith("-"):
-                if x not in self.valid_args:
-                    if not x.startswith("--"):
-                        x = x.replace("-", "")
-                    Error.invalid_argument(x)
+                if "--time" in x:
+                    if "=" in x:
+                        x = x.split("=")
+                        if x[1] in self.access_words:
+                            Vars.access_only = True
+                        elif x[1] in self.modify_words:
+                            Vars.modify_only = True
+                        else:
+                            Error.invalid_arg_option(x[1], "--time")
+                    else:
+                        Error.no_argument("time")
                 
-                if "-t" in x:
+                elif "-t" in x:
                     try:
                         File.get_time_stamp(self, Error, self.args[index + 1])
                         index_ignore += [index + 1]
                     except IndexError:
                         Error.no_argument(x.replace("-", ""))
 
-                if "-r" in x:
+                elif "-r" in x:
                     try:
                         Vars.ref_file = os.path.join(self.args[index + 1])
                         index_ignore += [index + 1]
@@ -105,17 +114,23 @@ class Variables:
                     if not os.path.exists(self.args[index + 1]):
                         Error.attrib(self.args[index + 1])
 
-                if "-m" in x:
+                elif "-m" in x:
                     Vars.modify_only = True
 
-                if "-a" in x:
+                elif "-a" in x:
                     Vars.access_only = True
 
-                if "-c" in x:
+                elif "-c" in x:
                     Vars.create_new = False
 
-                if "-h" in x:
+                elif "-h" in x:
                     Vars.symlinks = False
+
+                elif x not in self.valid_args:
+                    if not x.startswith("--"):
+                        x = x.replace("-", "")
+                    Error.invalid_argument(x)
+ 
             else:
                 if index not in index_ignore: # dont parse option arguments as files
                     self.file_list.append(x)
@@ -143,6 +158,10 @@ class Exceptions(Variables):
 
     def invalid_argument(self, argument):
         print(f"{self.program}: invalid option -- '{argument}'\nTry '{self.program} --help' for more information.")
+        exit(1)
+
+    def invalid_arg_option(self, argument, command):
+        print(f"{self.program}: invalid argument '{argument}' for '{command}'\nTry '{self.program} --help' for more information.")
         exit(1)
 
 
